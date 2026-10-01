@@ -24,6 +24,10 @@ function Preparations() {
           label: "Exam Name",
         },
         {
+          key: "syllabus",
+          label: "Syllabus",
+        },
+        {
           key: "status",
           label: "Status",
           render: (item) => (
@@ -42,6 +46,11 @@ function Preparations() {
           name: "examName",
           label: "Exam Name",
           required: true,
+        },
+        {
+          name: "syllabus",
+          label: "Syllabus",
+          type: "textarea",
         },
         {
           name: "status",

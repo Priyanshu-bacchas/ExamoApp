@@ -1,15 +1,28 @@
+
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "https://localhost:7183/api";
+  import.meta.env.VITE_API_BASE_URL ||
+  "https://localhost:7183/api";
 
 async function request(endpoint, options = {}) {
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    method: options.method || "GET",
+  const method = options.method || "GET";
+
+  const config = {
+    method,
     headers: {
-      "Content-Type": "application/json",
       ...(options.headers || {}),
     },
-    body: options.body,
-  });
+  };
+
+  // JSON body hone par hi Content-Type aur body add karo
+  if (options.body !== undefined && options.body !== null) {
+    config.headers["Content-Type"] = "application/json";
+    config.body = options.body;
+  }
+
+  const response = await fetch(
+    `${API_BASE_URL}${endpoint}`,
+    config
+  );
 
   const text = await response.text();
 
@@ -28,6 +41,8 @@ async function request(endpoint, options = {}) {
 
     if (data?.message) {
       message = data.message;
+    } else if (data?.Message) {
+      message = data.Message;
     } else if (data?.title) {
       message = data.title;
     } else if (data?.errors) {
@@ -38,6 +53,8 @@ async function request(endpoint, options = {}) {
       if (validationErrors) {
         message = validationErrors;
       }
+    } else if (typeof data === "string" && data.trim()) {
+      message = data;
     }
 
     throw new Error(message);
@@ -46,31 +63,48 @@ async function request(endpoint, options = {}) {
   return data;
 }
 
+// ===============================
+// GET
+// ===============================
 export const apiGet = (endpoint) =>
   request(endpoint, {
     method: "GET",
   });
 
+// ===============================
+// POST
+// ===============================
 export const apiPost = (endpoint, data) =>
   request(endpoint, {
     method: "POST",
     body: JSON.stringify(data),
   });
 
+// ===============================
+// PUT
+// ===============================
 export const apiPut = (endpoint, data) =>
   request(endpoint, {
     method: "PUT",
     body: JSON.stringify(data),
   });
 
+// ===============================
+// DELETE
+// ===============================
 export const apiDelete = (endpoint) =>
   request(endpoint, {
     method: "DELETE",
   });
 
-export default {
+// ===============================
+// DEFAULT API OBJECT
+// ===============================
+const api = {
   get: apiGet,
   post: apiPost,
   put: apiPut,
   delete: apiDelete,
 };
+
+export default api;
