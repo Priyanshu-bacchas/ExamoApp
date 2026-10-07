@@ -12,8 +12,12 @@ import { getExams } from "../services/examService";
 import { getExamForms } from "../services/examFormService";
 import { getSubjects } from "../services/subjectService";
 import { getSchedules } from "../services/scheduleService";
+import { getFirstName, isAdmin } from "../services/authService";
 
-function Dashboard({ onNavigate }) {
+function Dashboard({ onNavigate, user }) {
+  const firstName = getFirstName(user);
+  const admin = isAdmin(user);
+
   const [exams, setExams] = useState([]);
   const [examForms, setExamForms] = useState([]);
   const [subjects, setSubjects] = useState([]);
@@ -182,7 +186,7 @@ function Dashboard({ onNavigate }) {
           </p>
 
           <h1>
-            Welcome back, Priyanshu 👋
+            Welcome back, {firstName} 👋
           </h1>
 
           <p>
@@ -462,14 +466,16 @@ function Dashboard({ onNavigate }) {
         </div>
 
         <div className="quick-actions">
-          <button
-            onClick={() =>
-              onNavigate("students")
-            }
-          >
-            <UsersIcon />
-            Add Student
-          </button>
+          {admin && (
+            <button
+              onClick={() =>
+                onNavigate("students")
+              }
+            >
+              <UsersIcon />
+              Add Student
+            </button>
+          )}
 
           <button
             onClick={() =>

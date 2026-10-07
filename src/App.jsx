@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import Layout from "./components/Layout";
 
+import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Students from "./pages/Students";
 import ExamForms from "./pages/ExamForms";
@@ -10,12 +11,44 @@ import Preparations from "./pages/Preparations";
 import Subjects from "./pages/Subjects";
 import Schedules from "./pages/Schedules";
 
+import {
+  getUser,
+  isAdmin,
+  isAuthenticated,
+  logout,
+} from "./services/authService";
+
 function App() {
-  const [activePage, setActivePage] =
-    useState("dashboard");
+  const [loggedIn, setLoggedIn] = useState(isAuthenticated());
+  const [user, setUser] = useState(getUser());
+  const [activePage, setActivePage] = useState("dashboard");
+
+  function handleAuthSuccess() {
+    setUser(getUser());
+    setActivePage("dashboard");
+    setLoggedIn(true);
+  }
+
+  function handleLogout() {
+    logout();
+    setUser(null);
+    setLoggedIn(false);
+    setActivePage("dashboard");
+  }
+
+  // Login nahi hai to Login/Signup page dikhao
+  if (!loggedIn) {
+    return <Auth onSuccess={handleAuthSuccess} />;
+  }
+
+  const admin = isAdmin(user);
+
+  // Student Records sirf Admin ke liye
+  const currentPage =
+    activePage === "students" && !admin ? "dashboard" : activePage;
 
   function renderPage() {
-    switch (activePage) {
+    switch (currentPage) {
       case "students":
         return <Students />;
 
@@ -39,6 +72,7 @@ function App() {
         return (
           <Dashboard
             onNavigate={setActivePage}
+            user={user}
           />
         );
     }
@@ -46,8 +80,10 @@ function App() {
 
   return (
     <Layout
-      activePage={activePage}
+      activePage={currentPage}
       onNavigate={setActivePage}
+      user={user}
+      onLogout={handleLogout}
     >
       {renderPage()}
     </Layout>

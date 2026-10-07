@@ -1,4 +1,10 @@
-import { apiGet, apiPost, apiPut, apiDelete } from "./api";
+import {
+  apiGet,
+  apiPost,
+  apiPut,
+  apiDelete,
+  authHeaders,
+} from "./api";
 
 export const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "https://localhost:7183/api";
@@ -20,6 +26,7 @@ export const uploadSubjectPdf = async (id, file) => {
 
   const response = await fetch(`${API_BASE_URL}/Subjects/${id}/pdf`, {
     method: "POST",
+    headers: authHeaders(), // JWT token (Content-Type browser khud set karega)
     body: formData,
   });
 

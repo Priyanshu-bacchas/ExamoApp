@@ -5,9 +5,15 @@ import {
   ClipboardList,
   BookOpen,
   CalendarDays,
-  Clock,
   Menu,
+  LogOut,
 } from "lucide-react";
+
+import {
+  getDisplayName,
+  getRoleLabel,
+  isAdmin,
+} from "../services/authService";
 
 const menuItems = [
   {
@@ -19,6 +25,7 @@ const menuItems = [
     key: "students",
     label: "Student Records",
     icon: Users,
+    adminOnly: true,
   },
   {
     key: "examForms",
@@ -47,7 +54,25 @@ const menuItems = [
   },
 ];
 
-function Layout({ activePage, onNavigate, children }) {
+function Layout({
+  activePage,
+  onNavigate,
+  user,
+  onLogout,
+  children,
+}) {
+  const displayName = getDisplayName(user);
+  const roleLabel = getRoleLabel(user);
+
+  const initial = displayName
+    ? displayName.charAt(0).toUpperCase()
+    : "S";
+
+  const visibleMenu = menuItems.filter(
+    (item) =>
+      !item.adminOnly || isAdmin(user),
+  );
+
   return (
     <div className="app-layout">
       <aside className="sidebar">
@@ -57,8 +82,13 @@ function Layout({ activePage, onNavigate, children }) {
           </div>
 
           <div>
-            <div className="brand-name">Examo</div>
-            <div className="brand-subtitle">Student Management</div>
+            <div className="brand-name">
+              Examo
+            </div>
+
+            <div className="brand-subtitle">
+              Student Management
+            </div>
           </div>
         </div>
 
@@ -67,19 +97,27 @@ function Layout({ activePage, onNavigate, children }) {
         </div>
 
         <nav className="sidebar-nav">
-          {menuItems.map((item) => {
+          {visibleMenu.map((item) => {
             const Icon = item.icon;
 
             return (
               <button
                 key={item.key}
+                type="button"
                 className={`sidebar-item ${
-                  activePage === item.key ? "active" : ""
+                  activePage === item.key
+                    ? "active"
+                    : ""
                 }`}
-                onClick={() => onNavigate(item.key)}
+                onClick={() =>
+                  onNavigate(item.key)
+                }
               >
                 <Icon size={18} />
-                <span>{item.label}</span>
+
+                <span>
+                  {item.label}
+                </span>
               </button>
             );
           })}
@@ -87,13 +125,32 @@ function Layout({ activePage, onNavigate, children }) {
 
         <div className="sidebar-bottom">
           <div className="profile-mini">
-            <div className="avatar">P</div>
+            <div className="avatar">
+              {initial}
+            </div>
 
             <div>
-              <strong>Priyanshu</strong>
-              <span>Student</span>
+              <strong>
+                {displayName}
+              </strong>
+
+              <span>
+                {roleLabel}
+              </span>
             </div>
           </div>
+
+          <button
+            type="button"
+            className="logout-btn"
+            onClick={onLogout}
+          >
+            <LogOut size={16} />
+
+            <span>
+              Logout
+            </span>
+          </button>
         </div>
       </aside>
 
@@ -104,15 +161,25 @@ function Layout({ activePage, onNavigate, children }) {
           </div>
 
           <div className="breadcrumb">
-            Examo / <strong>{getPageName(activePage)}</strong>
+            Examo /{" "}
+            <strong>
+              {getPageName(activePage)}
+            </strong>
           </div>
 
           <div className="topbar-profile">
-            <div className="avatar">P</div>
+            <div className="avatar">
+              {initial}
+            </div>
 
             <div>
-              <strong>Priyanshu</strong>
-              <span>Student</span>
+              <strong>
+                {displayName}
+              </strong>
+
+              <span>
+                {roleLabel}
+              </span>
             </div>
           </div>
         </header>
