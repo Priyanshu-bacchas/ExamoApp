@@ -13,3 +13,11 @@ export const updateStudent = (id, data) =>
 
 export const deleteStudent = (id) =>
   apiDelete(`/Students/${id}`);
+
+// Admin: user ko block / unblock
+export const setStudentBlocked = (id, isBlocked) =>
+  apiPost(`/Students/${id}/block`, { isBlocked });
+
+// Admin: user ka password reset
+export const resetStudentPassword = (id, newPassword) =>
+  apiPost(`/Students/${id}/reset-password`, { newPassword });

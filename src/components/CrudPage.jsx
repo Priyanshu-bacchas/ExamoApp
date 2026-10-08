@@ -14,6 +14,7 @@ function CrudPage({
   fields,
   service,
   emptyMessage,
+  extraActions,
 }) {
   const [items, setItems] = useState([]);
   const [formData, setFormData] = useState({});
@@ -202,7 +203,7 @@ function CrudPage({
       <div className="page-header">
         <div>
           <h1>{title}</h1>
-          <p>{description}</p>
+          {description && <p>{description}</p>}
         </div>
 
         <div className="header-actions">
@@ -285,6 +286,9 @@ function CrudPage({
 
                     <td>
                       <div className="row-actions">
+                        {extraActions &&
+                          extraActions(item, loadData)}
+
                         <button
                           className="edit-button"
                           onClick={() =>

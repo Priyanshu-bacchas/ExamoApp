@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import Layout from "./components/Layout";
+import AdminLayout from "./components/AdminLayout";
 
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
@@ -10,6 +11,8 @@ import Exams from "./pages/Exams";
 import Preparations from "./pages/Preparations";
 import Subjects from "./pages/Subjects";
 import Schedules from "./pages/Schedules";
+import AdminOverview from "./pages/AdminOverview";
+import AdminLogs from "./pages/AdminLogs";
 
 import {
   getUser,
@@ -43,15 +46,53 @@ function App() {
 
   const admin = isAdmin(user);
 
-  // Student Records sirf Admin ke liye
-  const currentPage =
-    activePage === "students" && !admin ? "dashboard" : activePage;
+  // =====================================================
+  // ADMIN: sirf 3 sections
+  //   Dashboard Insights, User & Role Management, Logs & Security
+  // =====================================================
+  if (admin) {
+    const adminPage = ["dashboard", "users", "logs"].includes(
+      activePage
+    )
+      ? activePage
+      : "dashboard";
 
+    function renderAdminPage() {
+      switch (adminPage) {
+        case "users":
+          return <Students />;
+
+        case "logs":
+          return <AdminLogs />;
+
+        case "dashboard":
+        default:
+          return (
+            <AdminOverview
+              user={user}
+              onNavigate={setActivePage}
+            />
+          );
+      }
+    }
+
+    return (
+      <AdminLayout
+        activePage={adminPage}
+        onNavigate={setActivePage}
+        user={user}
+        onLogout={handleLogout}
+      >
+        {renderAdminPage()}
+      </AdminLayout>
+    );
+  }
+
+  // =====================================================
+  // STUDENT: pehle jaisa
+  // =====================================================
   function renderPage() {
-    switch (currentPage) {
-      case "students":
-        return <Students />;
-
+    switch (activePage) {
       case "examForms":
         return <ExamForms />;
 
@@ -78,9 +119,15 @@ function App() {
     }
   }
 
+  const studentPage =
+    activePage === "students" || activePage === "users" ||
+    activePage === "logs"
+      ? "dashboard"
+      : activePage;
+
   return (
     <Layout
-      activePage={currentPage}
+      activePage={studentPage}
       onNavigate={setActivePage}
       user={user}
       onLogout={handleLogout}
