@@ -132,8 +132,14 @@ function AdminOverview({ onNavigate }) {
       <div className="adm-row-a">
         <section className="adm-card adm-col-card">
           <div className="adm-card-head">
-            <div>
-              <h2>User Registrations (Last 30 Days)</h2>
+            <div className="adm-head-title">
+              <span className="adm-head-icon adm-tone-blue">
+                <UserPlus size={16} />
+              </span>
+
+              <div>
+                <h2>User Registrations (Last 30 Days)</h2>
+              </div>
             </div>
           </div>
 
@@ -196,10 +202,16 @@ function AdminOverview({ onNavigate }) {
 
         <section className="adm-card adm-col-card">
           <div className="adm-card-head">
-            <div>
-              <h2>Platform Snapshot</h2>
+            <div className="adm-head-title">
+              <span className="adm-head-icon adm-tone-violet">
+                <Users size={16} />
+              </span>
 
-              <p>Students vs admins</p>
+              <div>
+                <h2>Platform Snapshot</h2>
+
+                <p>Students vs admins</p>
+              </div>
             </div>
           </div>
 
@@ -228,10 +240,16 @@ function AdminOverview({ onNavigate }) {
 
         <section className="adm-card adm-col-card">
           <div className="adm-card-head">
-            <div>
-              <h2>Login Security (24h)</h2>
+            <div className="adm-head-title">
+              <span className="adm-head-icon adm-tone-green">
+                <ShieldCheck size={16} />
+              </span>
 
-              <p>Successful vs failed login attempts</p>
+              <div>
+                <h2>Login Security (24h)</h2>
+
+                <p>Successful vs failed login attempts</p>
+              </div>
             </div>
           </div>
 
@@ -243,10 +261,16 @@ function AdminOverview({ onNavigate }) {
 
       <section className="adm-card adm-recent">
         <div className="adm-card-head">
-          <div>
-            <h2>Recent Activity</h2>
+          <div className="adm-head-title">
+            <span className="adm-head-icon adm-tone-teal">
+              <Activity size={16} />
+            </span>
 
-            <p>Latest logins and changes on the platform</p>
+            <div>
+              <h2>Recent Activity</h2>
+
+              <p>Latest logins and changes on the platform</p>
+            </div>
           </div>
 
           <button

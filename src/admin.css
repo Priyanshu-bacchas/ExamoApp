@@ -1317,10 +1317,9 @@
 
 
 /* =========================================================
-   FULL-SCREEN DASHBOARD  (screen ki height ke hisaab se size)
+   DASHBOARD LAYOUT v2  (balanced sizes, screen ke hisaab se)
    ========================================================= */
 
-/* Poori width use karo */
 .adm-shell .adm-content {
   max-width: none;
 }
@@ -1330,10 +1329,27 @@
   flex-direction: column;
 }
 
-/* Cards ke andar content flex se failta hai */
+/* Card heading with small icon chip */
+.adm-shell .adm-head-title {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.adm-shell .adm-head-icon {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+}
+
+/* Cards: content andar flex se adjust hota hai */
 .adm-shell .adm-col-card {
   display: flex;
   flex-direction: column;
+  min-height: 0;
 }
 
 .adm-shell .adm-fill-body {
@@ -1362,7 +1378,7 @@
 .adm-shell .adm-col-card .adm-chart {
   flex: 1;
   height: auto;
-  min-height: 110px;
+  min-height: 80px;
   align-items: stretch;
 }
 
@@ -1370,9 +1386,12 @@
   height: auto;
 }
 
-/* Recent Activity: simple vertical list */
+.adm-shell .adm-bar {
+  border-radius: 4px 4px 2px 2px;
+}
+
+/* Recent Activity: clean vertical list */
 .adm-shell .adm-activity-list {
-  flex: 1;
   display: flex;
   flex-direction: column;
 }
@@ -1380,100 +1399,112 @@
 .adm-shell .adm-activity-list .adm-activity-item,
 .adm-shell .adm-activity-list .adm-activity-item:first-child,
 .adm-shell .adm-activity-list .adm-activity-item:last-child {
-  flex: 1;
+  flex: none;
   gap: 14px;
-  padding: 6px 0;
+  padding: 8px 6px;
   border-bottom: 1px solid #eef1f6;
+  border-radius: 10px;
+  transition: background 0.15s;
 }
 
 .adm-shell .adm-activity-list .adm-activity-item:last-child {
   border-bottom: 0;
 }
 
+.adm-shell .adm-activity-list .adm-activity-item:hover {
+  background: #f8faff;
+}
+
 .adm-shell .adm-activity-list .adm-activity-icon {
-  width: clamp(32px, 4.4vh, 42px);
-  height: clamp(32px, 4.4vh, 42px);
+  width: 38px;
+  height: 38px;
   border-radius: 11px;
 }
 
 .adm-shell .adm-activity-list .adm-activity-main strong {
-  font-size: clamp(13px, 1.5vh, 15px);
+  font-size: 13.5px;
 }
 
 .adm-shell .adm-activity-list .adm-activity-main span {
-  font-size: clamp(11.5px, 1.3vh, 13px);
+  font-size: 12px;
 }
 
 .adm-shell .adm-activity-list .adm-empty {
-  flex: 1;
-  display: grid;
-  place-items: center;
+  padding: 24px 0;
 }
 
-/* Dashboard height = screen height (laptop se bade screen par) */
+/* ---------- Large screens: sizes screen height ke hisaab se ---------- */
+
 @media (min-width: 1101px) {
-  .adm-shell .adm-dash {
-    height: calc(100vh - 98px);
-    min-height: 600px;
-  }
-
-  .adm-shell .adm-row-a {
-    flex: 1.15 1 0;
-    min-height: 0;
-  }
-
-  .adm-shell .adm-recent {
-    flex: 1 1 0;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 0;
-  }
-
+  /* Stat cards */
   .adm-shell .adm-stat {
-    padding: clamp(12px, 1.8vh, 20px) 16px;
+    gap: 14px;
+    padding: clamp(14px, 2vh, 22px) 18px;
   }
 
   .adm-shell .adm-stat-icon {
-    width: clamp(38px, 5vh, 48px);
-    height: clamp(38px, 5vh, 48px);
+    width: clamp(40px, 5vh, 50px);
+    height: clamp(40px, 5vh, 50px);
   }
 
   .adm-shell .adm-stat-body strong {
-    font-size: clamp(22px, 3vh, 30px);
+    font-size: clamp(24px, 3.2vh, 32px);
+  }
+
+  /* Row A: teeno cards same height, chhote aur balanced */
+  .adm-shell .adm-row-a {
+    grid-template-columns:
+      minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr);
+    height: clamp(236px, 27vh, 320px);
+    flex: none;
+  }
+
+  .adm-shell .adm-row-a .adm-card {
+    min-height: 0;
+    overflow: hidden;
   }
 
   .adm-shell .adm-ring,
   .adm-shell .adm-card-compact .adm-ring,
   .adm-shell .adm-ring svg,
   .adm-shell .adm-card-compact .adm-ring svg {
-    width: clamp(92px, 15vh, 150px);
-    height: clamp(92px, 15vh, 150px);
+    width: clamp(84px, 12vh, 118px);
+    height: clamp(84px, 12vh, 118px);
   }
 
   .adm-shell .adm-ring-center strong,
   .adm-shell .adm-card-compact .adm-ring-center strong {
-    font-size: clamp(19px, 3vh, 30px);
+    font-size: clamp(18px, 2.6vh, 26px);
   }
 
   .adm-shell .adm-legend-row,
   .adm-shell .adm-card-compact .adm-legend-row {
-    padding: clamp(8px, 1.4vh, 14px) 14px;
+    padding: clamp(7px, 1.1vh, 11px) 14px;
   }
 
   .adm-shell .adm-mini {
-    padding: clamp(8px, 1.3vh, 13px) 14px;
+    padding: clamp(7px, 1.1vh, 11px) 14px;
+  }
+
+  /* Recent Activity rows thode lambe (screen ke hisaab se) */
+  .adm-shell .adm-activity-list .adm-activity-item {
+    min-height: clamp(54px, 6.6vh, 76px);
   }
 }
 
-/* Chhote screen: natural scroll, chart ko fixed height */
+/* ---------- Chhote screen: natural scroll ---------- */
+
 @media (max-width: 1100px) {
+  .adm-shell .adm-row-a {
+    height: auto;
+  }
+
   .adm-shell .adm-col-card .adm-chart {
     height: 130px;
     flex: none;
   }
 
   .adm-shell .adm-activity-list .adm-activity-item {
-    padding: 10px 0;
+    padding: 10px 6px;
   }
 }
