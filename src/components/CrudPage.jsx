@@ -44,7 +44,7 @@ function CrudPage({
     } catch (error) {
       console.error(error);
       setError(
-        error.message || "Data load nahi ho saka."
+        error.message || "Failed to load data."
       );
     } finally {
       setLoading(false);
@@ -170,7 +170,7 @@ function CrudPage({
     } catch (error) {
       console.error(error);
       setError(
-        error.message || "Save nahi ho saka."
+        error.message || "Failed to save."
       );
     } finally {
       setSaving(false);
@@ -179,7 +179,7 @@ function CrudPage({
 
   async function handleDelete(id) {
     const confirmed = window.confirm(
-      "Kya aap is record ko delete karna chahte hain?"
+      "Are you sure you want to delete this record?"
     );
 
     if (!confirmed) return;
@@ -193,7 +193,7 @@ function CrudPage({
     } catch (error) {
       console.error(error);
       setError(
-        error.message || "Delete nahi ho saka."
+        error.message || "Failed to delete."
       );
     }
   }

@@ -13,7 +13,7 @@ import {
   setStudentBlocked,
 } from "../services/studentService";
 
-// Password cell: default me chhupa hua, eye icon se dikhta hai
+// Password cell: default hidden, visible via eye icon
 function PasswordCell({ value }) {
   const [show, setShow] = useState(false);
 
@@ -56,7 +56,7 @@ function PasswordCell({ value }) {
   );
 }
 
-// Credentials Reset: admin user ka naya password set karta hai
+// Credentials Reset: sets a new password for the user
 function ResetPasswordAction({ item, onDone }) {
   const [open, setOpen] = useState(false);
   const [newPassword, setNewPassword] = useState("");
@@ -77,7 +77,7 @@ function ResetPasswordAction({ item, onDone }) {
     event.preventDefault();
 
     if (newPassword.length < 6) {
-      setError("Password kam se kam 6 characters ka hona chahiye.");
+      setError("Password must be at least 6 characters long.");
       return;
     }
 
@@ -90,7 +90,7 @@ function ResetPasswordAction({ item, onDone }) {
       setOpen(false);
       await onDone();
     } catch (err) {
-      setError(err.message || "Password reset nahi ho saka.");
+      setError(err.message || "Failed to reset password.");
     } finally {
       setSaving(false);
     }
@@ -158,13 +158,13 @@ function ResetPasswordAction({ item, onDone }) {
   );
 }
 
-// Block / Unblock: blocked user login nahi kar sakta
+// Block / Unblock: blocked user cannot log in
 function BlockAction({ item, onDone }) {
   const [busy, setBusy] = useState(false);
 
   const currentUser = getUser();
 
-  // Admin khud ko block nahi kar sakta
+  // Admin cannot block themselves
   if (currentUser && currentUser.id === item.id) {
     return null;
   }
@@ -174,8 +174,8 @@ function BlockAction({ item, onDone }) {
 
     const ok = window.confirm(
       next
-        ? `${item.name} ko block karna hai? Wo login nahi kar payega.`
-        : `${item.name} ko unblock karna hai?`
+        ? `Are you sure you want to block ${item.name}? They will not be able to log in.`
+        : `Are you sure you want to unblock ${item.name}?`
     );
 
     if (!ok) return;
@@ -187,7 +187,7 @@ function BlockAction({ item, onDone }) {
 
       await onDone();
     } catch (err) {
-      window.alert(err.message || "Action nahi ho saka.");
+      window.alert(err.message || "Action failed.");
     } finally {
       setBusy(false);
     }
