@@ -13,6 +13,7 @@ import Subjects from "./pages/Subjects";
 import Schedules from "./pages/Schedules";
 import AdminOverview from "./pages/AdminOverview";
 import AdminLogs from "./pages/AdminLogs";
+import AdminAnalytics from "./pages/AdminAnalytics";
 
 import {
   getUser,
@@ -51,7 +52,7 @@ function App() {
   //   Dashboard Insights, User & Role Management, Logs & Security
   // =====================================================
   if (admin) {
-    const adminPage = ["dashboard", "users", "logs"].includes(
+    const adminPage = ["dashboard", "users", "logs", "analytics"].includes(
       activePage
     )
       ? activePage
@@ -64,6 +65,9 @@ function App() {
 
         case "logs":
           return <AdminLogs />;
+
+        case "analytics":
+          return <AdminAnalytics />;
 
         case "dashboard":
         default:
@@ -120,8 +124,10 @@ function App() {
   }
 
   const studentPage =
-    activePage === "students" || activePage === "users" ||
-    activePage === "logs"
+    activePage === "students" ||
+    activePage === "users" ||
+    activePage === "logs" ||
+    activePage === "analytics"
       ? "dashboard"
       : activePage;
 

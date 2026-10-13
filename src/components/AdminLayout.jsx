@@ -3,6 +3,7 @@ import {
   LayoutDashboard,
   Users,
   ShieldCheck,
+  TrendingUp,
   Menu,
   X,
   LogOut,
@@ -32,6 +33,11 @@ const menuItems = [
     key: "logs",
     label: "Logs & Security",
     icon: ShieldCheck,
+  },
+  {
+    key: "analytics",
+    label: "Analytics",
+    icon: TrendingUp,
   },
 ];
 
@@ -166,6 +172,7 @@ function getPageName(page) {
     dashboard: "Dashboard Insights",
     users: "User & Role Management",
     logs: "Logs & Security",
+    analytics: "Analytics",
   };
 
   return names[page] || "Dashboard Insights";

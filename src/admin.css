@@ -1508,3 +1508,373 @@
     padding: 10px 6px;
   }
 }
+
+
+/* =========================================================
+   SYSTEM HEALTH  (Web Service + Database) / Row B
+   ========================================================= */
+
+.adm-shell .adm-row-b {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+  align-items: stretch;
+}
+
+.adm-shell .adm-row-b > .adm-card {
+  min-height: 0;
+}
+
+.adm-shell .adm-health .adm-card-head {
+  align-items: center;
+}
+
+.adm-shell .adm-health-meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding: 9px 14px;
+  border-radius: 11px;
+  background: #f6f8fc;
+  font-size: 12.5px;
+  color: var(--adm-muted);
+}
+
+.adm-shell .adm-health-meta strong {
+  font-size: 16px;
+  color: var(--adm-ink);
+}
+
+.adm-shell .adm-health-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.adm-shell .adm-health-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 12px 14px;
+  border: 1px solid #eef1f6;
+  border-radius: 12px;
+}
+
+.adm-shell .adm-health-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--adm-muted);
+}
+
+.adm-shell .adm-health-value {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--adm-ink);
+}
+
+.adm-shell .adm-health-value small {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--adm-muted);
+}
+
+.adm-shell .adm-spark {
+  width: 100%;
+  height: clamp(44px, 6vh, 68px);
+}
+
+.adm-shell .adm-spark-empty {
+  display: grid;
+  place-items: center;
+  height: clamp(44px, 6vh, 68px);
+  font-size: 11.5px;
+  color: #98a2b3;
+}
+
+/* Live / Connected pill with pulsing dot */
+.adm-shell .adm-pill .adm-live-dot {
+  width: 7px;
+  height: 7px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: #16a34a;
+  animation: adm-pulse 1.8s ease-in-out infinite;
+}
+
+.adm-shell .adm-pill .adm-live-dot.off {
+  background: #dc2626;
+  animation: none;
+}
+
+@keyframes adm-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.45); }
+  50%      { box-shadow: 0 0 0 5px rgba(22, 163, 74, 0); }
+}
+
+@media (max-width: 1280px) {
+  .adm-shell .adm-row-b {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .adm-shell .adm-row-b > .adm-recent {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 760px) {
+  .adm-shell .adm-row-b {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .adm-shell .adm-health-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+
+/* =========================================================
+   ANALYTICS PAGE
+   ========================================================= */
+
+.adm-shell .adm-an-grid-1 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.adm-shell .adm-an-grid-1 > .adm-card {
+  min-height: 0;
+}
+
+.adm-shell .adm-an-grid-2 {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  gap: 12px;
+}
+
+.adm-shell .adm-an-right {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 12px;
+}
+
+/* DB: active connections ring */
+.adm-shell .adm-gauge-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.adm-shell .adm-gauge {
+  position: relative;
+  width: clamp(64px, 9vh, 88px);
+  height: clamp(64px, 9vh, 88px);
+}
+
+.adm-shell .adm-gauge svg {
+  width: 100%;
+  height: 100%;
+}
+
+.adm-shell .adm-gauge strong {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: clamp(18px, 2.6vh, 24px);
+  color: var(--adm-ink);
+}
+
+.adm-shell .adm-gauge-max {
+  font-size: clamp(18px, 2.6vh, 24px);
+  font-weight: 600;
+  color: var(--adm-muted);
+}
+
+/* Lifecycle */
+.adm-shell .adm-legend-chips {
+  display: flex;
+  gap: 14px;
+  font-size: 12px;
+  color: var(--adm-muted);
+}
+
+.adm-shell .adm-legend-chips i {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 6px;
+  border-radius: 3px;
+}
+
+.adm-shell .adm-life-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 250px;
+  gap: 22px;
+}
+
+.adm-shell .adm-life-chart {
+  position: relative;
+  padding-left: 30px;
+  background-image: linear-gradient(#eef1f6 1px, transparent 1px);
+  background-size: 100% 25%;
+}
+
+.adm-shell .adm-life-svg {
+  display: block;
+  width: 100%;
+  height: clamp(170px, 25vh, 280px);
+}
+
+.adm-shell .adm-life-x {
+  padding-left: 30px;
+}
+
+.adm-shell .adm-cohorts {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.adm-shell .adm-cohorts-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--adm-ink);
+}
+
+.adm-shell .adm-cohort-top {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  font-size: 12.5px;
+  color: var(--adm-text);
+}
+
+.adm-shell .adm-cohort-top strong {
+  color: var(--adm-ink);
+}
+
+.adm-shell .adm-cohort-top small {
+  font-weight: 500;
+  color: var(--adm-muted);
+}
+
+.adm-shell .adm-cohort-note {
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--adm-muted);
+}
+
+/* Growth bar charts */
+.adm-shell .adm-growth {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.adm-shell .adm-bars-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.adm-shell .adm-bars {
+  flex: 1;
+  min-height: 70px;
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  background-image: linear-gradient(#eef1f6 1px, transparent 1px);
+  background-size: 100% 33.3%;
+}
+
+.adm-shell .adm-bars-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  min-width: 0;
+}
+
+.adm-shell .adm-bars-val {
+  margin-bottom: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--adm-ink);
+}
+
+.adm-shell .adm-bars-bar {
+  width: 100%;
+  border-radius: 4px 4px 2px 2px;
+  background: linear-gradient(180deg, #3b82f6, #1d4ed8);
+}
+
+.adm-shell .adm-bars-bar.violet {
+  background: linear-gradient(180deg, #a78bfa, #7c3aed);
+}
+
+.adm-shell .adm-bars-bar.zero {
+  background: #e3e8f1;
+}
+
+.adm-shell .adm-bars-x {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 10.5px;
+  color: #98a2b3;
+}
+
+.adm-shell .adm-bars-x.all span {
+  flex: 1;
+  text-align: center;
+}
+
+@media (min-width: 1101px) {
+  .adm-shell .adm-an-grid-1 {
+    height: clamp(236px, 27vh, 300px);
+  }
+
+  .adm-shell .adm-an-grid-1 > .adm-card {
+    overflow: hidden;
+  }
+}
+
+@media (max-width: 1100px) {
+  .adm-shell .adm-an-grid-1,
+  .adm-shell .adm-an-grid-2 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .adm-shell .adm-an-right {
+    grid-template-rows: auto;
+  }
+
+  .adm-shell .adm-bars {
+    height: 120px;
+    flex: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .adm-shell .adm-life-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .adm-shell .adm-health-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -18,3 +18,11 @@ export const getActivityLogs = ({
 
   return apiGet(`/Admin/logs?${params.toString()}`);
 };
+
+// System health: web service (uptime, CPU, memory) + database
+export const getSystemMetrics = () =>
+  apiGet("/SystemMetrics");
+
+// Analytics: user lifecycle / growth data
+export const getUserAnalytics = (fresh = false) =>
+  apiGet(`/Analytics/users${fresh ? "?fresh=true" : ""}`);
