@@ -4,6 +4,7 @@ import {
   GraduationCap,
   ClipboardList,
   BookOpen,
+  Trophy,
   CalendarDays,
   Menu,
   LogOut,
@@ -41,6 +42,11 @@ const menuItems = [
     key: "preparations",
     label: "Preparation",
     icon: BookOpen,
+  },
+  {
+    key: "results",
+    label: "Results",
+    icon: Trophy,
   },
   {
     key: "subjects",
@@ -199,6 +205,7 @@ function getPageName(page) {
     examForms: "Exam Forms",
     exams: "Exams",
     preparations: "Preparation",
+    results: "Results",
     subjects: "Subjects",
     schedules: "Schedule",
   };

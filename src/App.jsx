@@ -9,6 +9,7 @@ import Students from "./pages/Students";
 import ExamForms from "./pages/ExamForms";
 import Exams from "./pages/Exams";
 import Preparations from "./pages/Preparations";
+import Results from "./pages/Results";
 import Subjects from "./pages/Subjects";
 import Schedules from "./pages/Schedules";
 import AdminOverview from "./pages/AdminOverview";
@@ -105,6 +106,9 @@ function App() {
 
       case "preparations":
         return <Preparations />;
+
+      case "results":
+        return <Results />;
 
       case "subjects":
         return <Subjects />;
