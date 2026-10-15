@@ -5,6 +5,7 @@ import {
   ClipboardList,
   BookOpen,
   Trophy,
+  FileText,
   CalendarDays,
   Menu,
   LogOut,
@@ -57,6 +58,11 @@ const menuItems = [
     key: "schedules",
     label: "Schedule",
     icon: CalendarDays,
+  },
+  {
+    key: "documents",
+    label: "Documents",
+    icon: FileText,
   },
 ];
 
@@ -208,6 +214,7 @@ function getPageName(page) {
     results: "Results",
     subjects: "Subjects",
     schedules: "Schedule",
+    documents: "Documents",
   };
 
   return names[page] || "Dashboard";

@@ -12,6 +12,7 @@ import Preparations from "./pages/Preparations";
 import Results from "./pages/Results";
 import Subjects from "./pages/Subjects";
 import Schedules from "./pages/Schedules";
+import Documents from "./pages/Documents";
 import AdminOverview from "./pages/AdminOverview";
 import AdminLogs from "./pages/AdminLogs";
 import AdminAnalytics from "./pages/AdminAnalytics";
@@ -115,6 +116,9 @@ function App() {
 
       case "schedules":
         return <Schedules />;
+
+      case "documents":
+        return <Documents />;
 
       case "dashboard":
       default:

@@ -1,12 +1,66 @@
+import { useState } from "react";
+
 import CrudPage from "../components/CrudPage";
+import { apiGet } from "../services/api";
 import {
   getSubjects,
   createSubject,
   updateSubject,
   deleteSubject,
   uploadSubjectPdf,
-  getSubjectPdfUrl,
 } from "../services/subjectService";
+
+// PDF kholne ka temporary (10 min) link: backend Supabase se banata hai
+// (yahin define hai, taaki subjectService.js me kuch badalna na pade)
+const getSubjectPdfLink = async (id) => {
+  const data = await apiGet(`/Subjects/${id}/pdf-url`);
+
+  return data?.url || "";
+};
+
+// PDF private storage me hai: click par backend se temporary link leke kholte hain
+function OpenPdfLink({ item }) {
+  const [busy, setBusy] = useState(false);
+
+  async function handleOpen(event) {
+    event.preventDefault();
+
+    // Popup blocker se bachne ke liye tab pehle hi khol lete hain
+    const tab = window.open("", "_blank");
+
+    try {
+      setBusy(true);
+
+      const url = await getSubjectPdfLink(item.id);
+
+      if (!url) throw new Error("PDF link nahi mila.");
+
+      if (tab) {
+        tab.location.href = url;
+      } else {
+        window.open(url, "_blank");
+      }
+    } catch (err) {
+      if (tab) tab.close();
+
+      window.alert(
+        err.message || "PDF open nahi ho saki."
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <a
+      className="table-link"
+      href="#"
+      onClick={handleOpen}
+    >
+      {busy ? "Opening..." : "Open PDF"}
+    </a>
+  );
+}
 
 function Subjects() {
   return (
@@ -52,14 +106,7 @@ function Subjects() {
           label: "PDF Lecture",
           render: (item) =>
             item.pdf ? (
-              <a
-                className="table-link"
-                href={getSubjectPdfUrl(item.pdf)}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Open PDF
-              </a>
+              <OpenPdfLink item={item} />
             ) : (
               "-"
             ),
