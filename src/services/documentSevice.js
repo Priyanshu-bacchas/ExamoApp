@@ -1,4 +1,4 @@
-import { apiGet, apiDelete, authHeaders } from "./api";
+import { apiGet, apiPut, apiDelete, authHeaders } from "./api";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "https://localhost:7183/api";
@@ -14,6 +14,17 @@ export const getDocumentUrl = async (id) => {
 
   return data?.url || "";
 };
+
+// Download ka temporary (10 min) link (file seedha download hoti hai)
+export const getDocumentDownloadUrl = async (id) => {
+  const data = await apiGet(`/Documents/${id}/download-url`);
+
+  return data?.url || "";
+};
+
+// Edit: document ka naam badalna
+export const renameDocument = (id, name) =>
+  apiPut(`/Documents/${id}`, { name });
 
 // Photo / PDF upload (multipart)
 export const uploadDocument = async (name, file) => {
@@ -45,7 +56,7 @@ export const uploadDocument = async (name, file) => {
       data?.message ||
       data?.Message ||
       data?.title ||
-      "Upload nahi ho saka.";
+      "Upload failed.";
 
     throw new Error(message);
   }

@@ -3,13 +3,15 @@ import {
   RefreshCw,
   Plus,
   Eye,
+  Download,
+  Pencil,
   Trash2,
   FileText,
   Image as ImageIcon,
 } from "lucide-react";
 
 import Modal from "../components/Modal";
-import { apiGet, apiDelete, authHeaders } from "../services/api";
+import { apiGet, apiPut, apiDelete, authHeaders } from "../services/api";
 
 // ---- Documents API (is file me hi, alag service file ki zaroorat nahi) ----
 
@@ -26,6 +28,17 @@ const getDocumentUrl = async (id) => {
 
   return data?.url || "";
 };
+
+// Download ka temporary (10 min) link (file seedha download hoti hai)
+const getDocumentDownloadUrl = async (id) => {
+  const data = await apiGet(`/Documents/${id}/download-url`);
+
+  return data?.url || "";
+};
+
+// Edit: document ka naam badalna
+const renameDocument = (id, name) =>
+  apiPut(`/Documents/${id}`, { name });
 
 // Photo / PDF upload (multipart)
 const uploadDocument = async (name, file) => {
@@ -57,7 +70,7 @@ const uploadDocument = async (name, file) => {
       data?.message ||
       data?.Message ||
       data?.title ||
-      "Upload nahi ho saka.";
+      "Upload failed.";
 
     throw new Error(message);
   }
@@ -80,6 +93,12 @@ function Documents() {
 
   const [busyId, setBusyId] = useState(null);
 
+  // Edit (rename) popup
+  const [editItem, setEditItem] = useState(null);
+  const [editName, setEditName] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [editError, setEditError] = useState("");
+
   useEffect(() => {
     loadData();
   }, []);
@@ -94,7 +113,7 @@ function Documents() {
       setItems(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
-      setError(err.message || "Documents load nahi ho sake.");
+      setError(err.message || "Failed to load documents.");
     } finally {
       setLoading(false);
     }
@@ -118,7 +137,7 @@ function Documents() {
 
     if (selected && selected.size > MAX_MB * 1024 * 1024) {
       setFile(null);
-      setFormError(`File ${MAX_MB} MB se chhoti honi chahiye.`);
+      setFormError(`File must be smaller than ${MAX_MB} MB.`);
       return;
     }
 
@@ -134,7 +153,7 @@ function Documents() {
     event.preventDefault();
 
     if (!file) {
-      setFormError("Photo ya PDF select karein.");
+      setFormError("Please select a photo or PDF.");
       return;
     }
 
@@ -148,7 +167,7 @@ function Documents() {
 
       await loadData();
     } catch (err) {
-      setFormError(err.message || "Upload nahi ho saka.");
+      setFormError(err.message || "Upload failed.");
     } finally {
       setUploading(false);
     }
@@ -163,7 +182,7 @@ function Documents() {
 
       const url = await getDocumentUrl(item.id);
 
-      if (!url) throw new Error("File ka link nahi mila.");
+      if (!url) throw new Error("File link not found.");
 
       if (tab) {
         tab.location.href = url;
@@ -173,14 +192,75 @@ function Documents() {
     } catch (err) {
       if (tab) tab.close();
 
-      window.alert(err.message || "File open nahi ho saki.");
+      window.alert(err.message || "Could not open the file.");
     } finally {
       setBusyId(null);
     }
   }
 
+  async function handleDownload(item) {
+    try {
+      setBusyId(item.id);
+
+      const url = await getDocumentDownloadUrl(item.id);
+
+      if (!url) throw new Error("Download link not found.");
+
+      // Hidden link click: page wahi rehta hai, file download hoti hai
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.rel = "noopener";
+      link.style.display = "none";
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      window.alert(err.message || "Could not download the file.");
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  function openEdit(item) {
+    setEditItem(item);
+    setEditName(item.name || "");
+    setEditError("");
+  }
+
+  function closeEdit() {
+    if (!saving) setEditItem(null);
+  }
+
+  async function handleSaveEdit(event) {
+    event.preventDefault();
+
+    const newName = editName.trim();
+
+    if (!newName) {
+      setEditError("Name is required.");
+      return;
+    }
+
+    try {
+      setSaving(true);
+      setEditError("");
+
+      await renameDocument(editItem.id, newName);
+
+      setEditItem(null);
+
+      await loadData();
+    } catch (err) {
+      setEditError(err.message || "Could not update the name.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   async function handleDelete(item) {
-    if (!window.confirm(`"${item.name}" delete karna hai?`)) return;
+    if (!window.confirm("Are you sure you want to delete this record?")) return;
 
     try {
       setBusyId(item.id);
@@ -189,7 +269,7 @@ function Documents() {
 
       await loadData();
     } catch (err) {
-      window.alert(err.message || "Delete nahi ho saka.");
+      window.alert(err.message || "Could not delete the document.");
     } finally {
       setBusyId(null);
     }
@@ -305,6 +385,24 @@ function Documents() {
                         </button>
 
                         <button
+                          className="edit-button"
+                          title="Download"
+                          onClick={() => handleDownload(item)}
+                          disabled={busyId === item.id}
+                        >
+                          <Download size={16} />
+                        </button>
+
+                        <button
+                          className="edit-button"
+                          title="Edit name"
+                          onClick={() => openEdit(item)}
+                          disabled={busyId === item.id}
+                        >
+                          <Pencil size={16} />
+                        </button>
+
+                        <button
                           className="delete-button"
                           title="Delete"
                           onClick={() => handleDelete(item)}
@@ -321,6 +419,55 @@ function Documents() {
           </div>
         )}
       </div>
+
+      {editItem && (
+        <Modal title="Edit Document" onClose={closeEdit}>
+          <form className="crud-form" onSubmit={handleSaveEdit}>
+            {editError && (
+              <div className="error-box full-width">{editError}</div>
+            )}
+
+            <div className="form-group full-width">
+              <label>
+                Document Name
+                <span className="required">*</span>
+              </label>
+
+              <input
+                type="text"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                placeholder="e.g. Passport size photo, Marksheet"
+                maxLength={150}
+                autoFocus
+              />
+
+              <small style={{ color: "#64748b" }}>
+                File: {editItem.fileName}
+              </small>
+            </div>
+
+            <div className="form-actions">
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={closeEdit}
+                disabled={saving}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                className="primary-button"
+                disabled={saving}
+              >
+                {saving ? "Saving..." : "Save"}
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
 
       {modalOpen && (
         <Modal title="Upload Document" onClose={closeModal}>
@@ -354,7 +501,7 @@ function Documents() {
               />
 
               <small style={{ color: "#64748b" }}>
-                JPG, PNG, WEBP ya PDF, max {MAX_MB} MB.
+                JPG, PNG, WEBP or PDF, max {MAX_MB} MB.
               </small>
             </div>
 
