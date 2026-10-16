@@ -13,6 +13,9 @@ import Results from "./pages/Results";
 import Subjects from "./pages/Subjects";
 import Schedules from "./pages/Schedules";
 import Documents from "./pages/Documents";
+import Help from "./pages/Help";
+import Subscription from "./pages/Subscription";
+import ComingSoon from "./pages/ComingSoon";
 import AdminOverview from "./pages/AdminOverview";
 import AdminLogs from "./pages/AdminLogs";
 import AdminAnalytics from "./pages/AdminAnalytics";
@@ -119,6 +122,16 @@ function App() {
 
       case "documents":
         return <Documents />;
+
+      case "jobs":
+      case "notifications":
+        return <ComingSoon page={activePage} />;
+
+      case "help":
+        return <Help onNavigate={setActivePage} />;
+
+      case "subscription":
+        return <Subscription onNavigate={setActivePage} />;
 
       case "dashboard":
       default:

@@ -72,7 +72,7 @@ async function request(endpoint, options = {}) {
       clearStoredSession();
       window.location.reload();
       throw new Error(
-        "Session expire ho gaya. Dobara login karein."
+        "Session expired. Please log in again."
       );
     }
 
@@ -98,7 +98,7 @@ async function request(endpoint, options = {}) {
 
     if (response.status === 403 && message.startsWith("API Error")) {
       message =
-        "Aapke paas is section ka access nahi hai (sirf Admin).";
+        "You do not have access to this section (Admin only).";
     }
 
     throw new Error(message);

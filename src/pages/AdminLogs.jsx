@@ -39,7 +39,7 @@ function AdminLogs() {
       );
     } catch (err) {
       console.error(err);
-      setError(err.message || "Logs load nahi ho sake.");
+      setError(err.message || "Unable to load logs.");
     } finally {
       setLoading(false);
     }

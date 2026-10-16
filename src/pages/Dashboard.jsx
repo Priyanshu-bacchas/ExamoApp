@@ -58,7 +58,7 @@ function Dashboard({ onNavigate, user }) {
 
       setError(
         error.message ||
-          "Dashboard data load nahi ho saka."
+          "Unable to load dashboard data."
       );
     } finally {
       setLoading(false);

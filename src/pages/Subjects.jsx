@@ -33,7 +33,7 @@ function OpenPdfLink({ item }) {
 
       const url = await getSubjectPdfLink(item.id);
 
-      if (!url) throw new Error("PDF link nahi mila.");
+      if (!url) throw new Error("PDF link not found.");
 
       if (tab) {
         tab.location.href = url;
@@ -44,7 +44,7 @@ function OpenPdfLink({ item }) {
       if (tab) tab.close();
 
       window.alert(
-        err.message || "PDF open nahi ho saki."
+        err.message || "Unable to open PDF."
       );
     } finally {
       setBusy(false);

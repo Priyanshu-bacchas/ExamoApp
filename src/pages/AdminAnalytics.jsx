@@ -33,7 +33,7 @@ function AdminAnalytics() {
       setData(await getUserAnalytics(fresh));
     } catch (err) {
       console.error(err);
-      setError(err.message || "Analytics load nahi ho saka.");
+      setError(err.message || "Unable to load analytics.");
     } finally {
       setLoading(false);
     }

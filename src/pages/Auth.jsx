@@ -252,15 +252,15 @@ export default function Auth({ onSuccess }) {
     setInfo("");
 
     if (signup.password !== signup.confirmPassword) {
-      return setError("Password and Confirm Password match nahi kar rahe.");
+      return setError("Password and Confirm Password do not match.");
     }
 
     if (!/^\d{10,15}$/.test(signup.mobileNumber.trim())) {
-      return setError("Valid mobile number daalein (10-15 digits).");
+      return setError("Please enter a valid mobile number (10-15 digits).");
     }
 
     if (!signup.agree) {
-      return setError("Terms & Conditions accept karna zaroori hai.");
+      return setError("Please accept the Terms & Conditions.");
     }
 
     setLoading(true);
@@ -271,7 +271,7 @@ export default function Auth({ onSuccess }) {
       if (res.token) {
         onSuccess?.();
       } else {
-        setInfo("Account ban gaya! Ab login karein.");
+        setInfo("Account created! Please log in.");
         setMode("login");
         setLoginTab("email");
         setLoginForm((f) => ({ ...f, email: signup.email, password: "" }));
@@ -420,7 +420,7 @@ export default function Auth({ onSuccess }) {
                 type="button"
                 className="ex-btn-outline"
                 onClick={() =>
-                  setError("Google login abhi backend se connect nahi hai.")
+                  setError("Google login is not connected to the backend yet.")
                 }
               >
                 <b>G</b> Continue with Google

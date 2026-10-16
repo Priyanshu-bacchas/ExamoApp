@@ -41,7 +41,7 @@ export const uploadSubjectPdf = async (id, file) => {
 
   if (!response.ok) {
     const message =
-      data?.message || data?.Message || data?.title || "PDF upload nahi ho saka.";
+      data?.message || data?.Message || data?.title || "Unable to upload PDF.";
     throw new Error(message);
   }
 

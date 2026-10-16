@@ -1,12 +1,17 @@
+import { useState } from "react";
+
 import {
   LayoutDashboard,
-  Users,
   GraduationCap,
   ClipboardList,
   BookOpen,
   Trophy,
   FileText,
   CalendarDays,
+  Briefcase,
+  Bell,
+  CreditCard,
+  ChevronDown,
   Menu,
   LogOut,
 } from "lucide-react";
@@ -14,57 +19,69 @@ import {
 import {
   getDisplayName,
   getRoleLabel,
-  isAdmin,
 } from "../services/authService";
 
-const menuItems = [
-  {
-    key: "dashboard",
-    label: "Dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    key: "students",
-    label: "Student Records",
-    icon: Users,
-    adminOnly: true,
-  },
-  {
-    key: "examForms",
-    label: "Exam Forms",
-    icon: ClipboardList,
-  },
-  {
-    key: "exams",
-    label: "Exams",
-    icon: GraduationCap,
-  },
-  {
-    key: "preparations",
-    label: "Preparation",
-    icon: BookOpen,
-  },
-  {
-    key: "results",
-    label: "Results",
-    icon: Trophy,
-  },
-  {
-    key: "subjects",
-    label: "Subjects",
-    icon: BookOpen,
-  },
-  {
-    key: "schedules",
-    label: "Schedule",
-    icon: CalendarDays,
-  },
-  {
-    key: "documents",
-    label: "Documents",
-    icon: FileText,
-  },
+import "./Layout.css";
+
+// Help icon (circle + question mark) - inline SVG
+function HelpIcon({ size = 18 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+      <path d="M12 17h.01" />
+    </svg>
+  );
+}
+
+// Student dropdown ke andar wale pages
+const studentChildren = [
+  { key: "examForms", label: "Exam Forms", icon: ClipboardList },
+  { key: "exams", label: "Exams", icon: GraduationCap },
+  { key: "preparations", label: "Preparation", icon: BookOpen },
+  { key: "results", label: "Results", icon: Trophy },
+  { key: "subjects", label: "Subjects", icon: BookOpen },
+  { key: "schedules", label: "Schedule", icon: CalendarDays },
+  { key: "documents", label: "Documents", icon: FileText },
 ];
+
+const overviewItems = [
+  { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+];
+
+const opportunityItems = [
+  { key: "jobs", label: "Jobs", icon: Briefcase },
+  { key: "notifications", label: "Notifications", icon: Bell },
+];
+
+const generalItems = [
+  { key: "help", label: "Help", icon: HelpIcon },
+  { key: "subscription", label: "Subscription", icon: CreditCard },
+];
+
+const pageNames = {
+  dashboard: "Dashboard",
+  examForms: "Exam Forms",
+  exams: "Exams",
+  preparations: "Preparation",
+  results: "Results",
+  subjects: "Subjects",
+  schedules: "Schedule",
+  documents: "Documents",
+  jobs: "Jobs",
+  notifications: "Notifications",
+  help: "Help",
+  subscription: "Subscription",
+};
 
 function Layout({
   activePage,
@@ -80,23 +97,34 @@ function Layout({
     ? displayName.charAt(0).toUpperCase()
     : "S";
 
-  const visibleMenu = menuItems.filter(
-    (item) =>
-      !item.adminOnly || isAdmin(user),
-  );
+  const [studentOpen, setStudentOpen] = useState(true);
+
+  function renderItem(item) {
+    const Icon = item.icon;
+
+    return (
+      <button
+        key={item.key}
+        type="button"
+        className={`sidebar-item ${
+          activePage === item.key ? "active" : ""
+        }`}
+        onClick={() => onNavigate(item.key)}
+      >
+        <Icon size={18} />
+        <span>{item.label}</span>
+      </button>
+    );
+  }
 
   return (
     <div className="app-layout">
       <aside className="sidebar">
         <div className="brand">
-          <div className="brand-logo">
-            E
-          </div>
+          <div className="brand-logo">E</div>
 
           <div>
-            <div className="brand-name">
-              Examo
-            </div>
+            <div className="brand-name">Examo</div>
 
             <div className="brand-subtitle">
               Student Management
@@ -104,51 +132,73 @@ function Layout({
           </div>
         </div>
 
-        <div className="sidebar-section-title">
-          Main Menu
-        </div>
+        <nav className="sidebar-nav sidebar-scroll">
+          <div className="sidebar-group-title">Overview</div>
+          {overviewItems.map(renderItem)}
 
-        <nav className="sidebar-nav">
-          {visibleMenu.map((item) => {
-            const Icon = item.icon;
+          <div className="sidebar-group-title">Academics</div>
 
-            return (
-              <button
-                key={item.key}
-                type="button"
-                className={`sidebar-item ${
-                  activePage === item.key
-                    ? "active"
-                    : ""
-                }`}
-                onClick={() =>
-                  onNavigate(item.key)
-                }
-              >
-                <Icon size={18} />
+          <button
+            type="button"
+            className={`sidebar-item ${
+              studentOpen ? "active" : ""
+            }`}
+            onClick={() => setStudentOpen((open) => !open)}
+            aria-expanded={studentOpen}
+          >
+            <GraduationCap size={18} />
+            <span>Student</span>
 
-                <span>
-                  {item.label}
-                </span>
-              </button>
-            );
-          })}
+            <ChevronDown
+              size={16}
+              className={`sidebar-chevron ${
+                studentOpen ? "open" : ""
+              }`}
+            />
+          </button>
+
+          <div
+            className={`sidebar-submenu ${
+              studentOpen ? "open" : ""
+            }`}
+          >
+            <div className="sidebar-submenu-inner">
+              {studentChildren.map((item) => {
+                const Icon = item.icon;
+
+                return (
+                  <button
+                    key={item.key}
+                    type="button"
+                    className={`sidebar-subitem ${
+                      activePage === item.key ? "active" : ""
+                    }`}
+                    onClick={() => onNavigate(item.key)}
+                  >
+                    <Icon size={17} />
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="sidebar-group-title">
+            Opportunities
+          </div>
+          {opportunityItems.map(renderItem)}
+
+          <div className="sidebar-group-title">General</div>
+          {generalItems.map(renderItem)}
         </nav>
 
         <div className="sidebar-bottom">
           <div className="profile-mini">
-            <div className="avatar">
-              {initial}
-            </div>
+            <div className="avatar">{initial}</div>
 
             <div>
-              <strong>
-                {displayName}
-              </strong>
-
-              <span>
-                {roleLabel}
-              </span>
+              <strong>{displayName}</strong>
+              <span>{roleLabel}</span>
             </div>
           </div>
 
@@ -159,9 +209,7 @@ function Layout({
           >
             <LogOut size={16} />
 
-            <span>
-              Logout
-            </span>
+            <span>Logout</span>
           </button>
         </div>
       </aside>
@@ -174,50 +222,23 @@ function Layout({
 
           <div className="breadcrumb">
             Examo /{" "}
-            <strong>
-              {getPageName(activePage)}
-            </strong>
+            <strong>{pageNames[activePage] || "Dashboard"}</strong>
           </div>
 
           <div className="topbar-profile">
-            <div className="avatar">
-              {initial}
-            </div>
+            <div className="avatar">{initial}</div>
 
             <div>
-              <strong>
-                {displayName}
-              </strong>
-
-              <span>
-                {roleLabel}
-              </span>
+              <strong>{displayName}</strong>
+              <span>{roleLabel}</span>
             </div>
           </div>
         </header>
 
-        <div className="content-area">
-          {children}
-        </div>
+        <div className="content-area">{children}</div>
       </main>
     </div>
   );
-}
-
-function getPageName(page) {
-  const names = {
-    dashboard: "Dashboard",
-    students: "Student Records",
-    examForms: "Exam Forms",
-    exams: "Exams",
-    preparations: "Preparation",
-    results: "Results",
-    subjects: "Subjects",
-    schedules: "Schedule",
-    documents: "Documents",
-  };
-
-  return names[page] || "Dashboard";
 }
 
 export default Layout;

@@ -34,7 +34,7 @@ function AdminOverview({ onNavigate }) {
       setData(overview);
     } catch (err) {
       console.error(err);
-      setError(err.message || "Overview load nahi ho saka.");
+      setError(err.message || "Unable to load overview.");
     } finally {
       setLoading(false);
     }

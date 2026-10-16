@@ -1,0 +1,93 @@
+/* ===== Student sidebar: groups + dropdown + scroll ===== */
+
+.sidebar-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 6px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.32);
+}
+
+.sidebar-group-title {
+  color: #8290a5;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 20px 13px 8px;
+}
+
+.sidebar-group-title:first-child {
+  padding-top: 18px;
+}
+
+.sidebar-chevron {
+  margin-left: auto;
+  transition: transform 0.25s ease;
+}
+
+.sidebar-chevron.open {
+  transform: rotate(180deg);
+}
+
+/* dropdown animation */
+.sidebar-submenu {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.25s ease;
+}
+
+.sidebar-submenu.open {
+  grid-template-rows: 1fr;
+}
+
+.sidebar-submenu-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.sidebar-subitem {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: #c4ccda;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 13px 10px 28px;
+  border-radius: 8px;
+  margin-top: 2px;
+  text-align: left;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.sidebar-subitem:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: white;
+}
+
+.sidebar-subitem.active {
+  background: rgba(37, 99, 235, 0.22);
+  color: white;
+  box-shadow: inset 3px 0 0 var(--blue);
+}
