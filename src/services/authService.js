@@ -98,6 +98,40 @@ export async function register({
   };
 }
 
+// Signup OTP verify -> token milta hai, login ho jaata hai
+export async function verifyEmail(email, otp, remember = true) {
+  const response = await apiPost("/Auth/verify-email", {
+    email: email.trim(),
+    otp: otp.trim(),
+  });
+
+  const { token, user } = normalizeAuthResponse(response);
+
+  if (!token) {
+    throw new Error("Verification done, but token was not returned.");
+  }
+
+  saveSession(token, user, remember);
+
+  return { token, user };
+}
+
+export function resendOtp(email) {
+  return apiPost("/Auth/resend-otp", { email: email.trim() });
+}
+
+export function forgotPassword(email) {
+  return apiPost("/Auth/forgot-password", { email: email.trim() });
+}
+
+export function resetPassword(email, otp, newPassword) {
+  return apiPost("/Auth/reset-password", {
+    email: email.trim(),
+    otp: otp.trim(),
+    newPassword,
+  });
+}
+
 export function logout() {
   clearSession();
 }

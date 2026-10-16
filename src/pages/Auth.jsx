@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Laptop,
   Smartphone,
@@ -9,7 +9,14 @@ import {
   Pencil,
 } from "lucide-react";
 
-import { login, register } from "../services/authService";
+import {
+  login,
+  register,
+  verifyEmail,
+  resendOtp,
+  forgotPassword,
+  resetPassword,
+} from "../services/authService";
 import "./Auth.css";
 
 /* ---------- Small helpers ---------- */
@@ -186,12 +193,21 @@ function Illustration() {
 
 /* ---------- Main component ---------- */
 
+const RESEND_SECONDS = 60;
+
 export default function Auth({ onSuccess }) {
+  // mode: login | signup | verify | forgot | reset
   const [mode, setMode] = useState("login");
   const [loginTab, setLoginTab] = useState("email");
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // OTP flow state
+  const [pendingEmail, setPendingEmail] = useState("");
+  const [otp, setOtp] = useState("");
+  const [cooldown, setCooldown] = useState(0);
+  const [reset, setReset] = useState({ password: "", confirm: "" });
 
   const [loginForm, setLoginForm] = useState({
     email: "",
@@ -211,6 +227,13 @@ export default function Auth({ onSuccess }) {
     agree: true,
   });
 
+  // Resend countdown
+  useEffect(() => {
+    if (cooldown <= 0) return undefined;
+    const t = setTimeout(() => setCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [cooldown]);
+
   const setL = (k) => (e) =>
     setLoginForm({
       ...loginForm,
@@ -227,7 +250,20 @@ export default function Auth({ onSuccess }) {
     setMode(m);
     setError("");
     setInfo("");
+    setOtp("");
   }
+
+  function startOtpScreen(nextMode, email, message) {
+    setPendingEmail(email);
+    setOtp("");
+    setReset({ password: "", confirm: "" });
+    setCooldown(RESEND_SECONDS);
+    setError("");
+    setInfo(message);
+    setMode(nextMode);
+  }
+
+  /* ---------- LOGIN ---------- */
 
   async function handleLogin(e) {
     e.preventDefault();
@@ -240,11 +276,22 @@ export default function Auth({ onSuccess }) {
       await login(identifier, loginForm.password, loginForm.remember);
       onSuccess?.();
     } catch (err) {
-      setError(err.message || "Login failed");
+      if (err.code === "EMAIL_NOT_VERIFIED" && err.data?.email) {
+        // Password sahi tha par email verify nahi thi -> OTP screen
+        startOtpScreen(
+          "verify",
+          err.data.email,
+          `Please verify your email. We sent a code to ${err.data.email}.`
+        );
+      } else {
+        setError(err.message || "Login failed");
+      }
     } finally {
       setLoading(false);
     }
   }
+
+  /* ---------- SIGNUP ---------- */
 
   async function handleRegister(e) {
     e.preventDefault();
@@ -270,6 +317,12 @@ export default function Auth({ onSuccess }) {
 
       if (res.token) {
         onSuccess?.();
+      } else if (res.requiresVerification) {
+        startOtpScreen(
+          "verify",
+          res.email || signup.email.trim(),
+          `We sent a 6-digit code to ${res.email || signup.email.trim()}.`
+        );
       } else {
         setInfo("Account created! Please log in.");
         setMode("login");
@@ -282,6 +335,126 @@ export default function Auth({ onSuccess }) {
       setLoading(false);
     }
   }
+
+  /* ---------- VERIFY EMAIL (signup OTP) ---------- */
+
+  async function handleVerify(e) {
+    e.preventDefault();
+    setError("");
+    setInfo("");
+
+    if (!/^\d{6}$/.test(otp)) {
+      return setError("Enter the 6-digit code.");
+    }
+
+    setLoading(true);
+
+    try {
+      await verifyEmail(pendingEmail, otp, loginForm.remember);
+      onSuccess?.();
+    } catch (err) {
+      setError(err.message || "Verification failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleResend() {
+    if (cooldown > 0) return;
+
+    setError("");
+    setInfo("");
+
+    try {
+      if (mode === "reset") {
+        await forgotPassword(pendingEmail);
+      } else {
+        await resendOtp(pendingEmail);
+      }
+
+      setCooldown(RESEND_SECONDS);
+      setInfo(`A new code was sent to ${pendingEmail}.`);
+    } catch (err) {
+      setError(err.message || "Could not resend the code.");
+    }
+  }
+
+  /* ---------- FORGOT PASSWORD ---------- */
+
+  async function handleForgot(e) {
+    e.preventDefault();
+    setError("");
+    setInfo("");
+
+    const email = (loginForm.email || "").trim();
+
+    if (!/^\S+@\S+\.\S+$/.test(email)) {
+      return setError("Enter the email address of your account.");
+    }
+
+    setLoading(true);
+
+    try {
+      await forgotPassword(email);
+
+      startOtpScreen(
+        "reset",
+        email,
+        `If an account exists for ${email}, we sent a 6-digit code.`
+      );
+    } catch (err) {
+      setError(err.message || "Could not send the code.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleReset(e) {
+    e.preventDefault();
+    setError("");
+    setInfo("");
+
+    if (!/^\d{6}$/.test(otp)) {
+      return setError("Enter the 6-digit code.");
+    }
+
+    if (reset.password.length < 6) {
+      return setError("Password must be at least 6 characters.");
+    }
+
+    if (reset.password !== reset.confirm) {
+      return setError("Password and Confirm Password do not match.");
+    }
+
+    setLoading(true);
+
+    try {
+      await resetPassword(pendingEmail, otp, reset.password);
+
+      setLoginTab("email");
+      setLoginForm((f) => ({ ...f, email: pendingEmail, password: "" }));
+      setMode("login");
+      setOtp("");
+      setInfo("Password updated. Please log in with your new password.");
+    } catch (err) {
+      setError(err.message || "Could not reset password");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const showTabs = mode === "login" || mode === "signup";
+
+  const resendButton = (
+    <button
+      type="button"
+      className="ex-link-btn"
+      disabled={cooldown > 0}
+      onClick={handleResend}
+    >
+      {cooldown > 0 ? `Resend code in ${cooldown}s` : "Resend code"}
+    </button>
+  );
 
   return (
     <div className="ex-page">
@@ -316,27 +489,30 @@ export default function Auth({ onSuccess }) {
             <Brand />
           </div>
 
-          <div className="ex-main-tabs">
-            <button
-              type="button"
-              className={mode === "login" ? "active" : ""}
-              onClick={() => switchMode("login")}
-            >
-              Login
-            </button>
-            <button
-              type="button"
-              className={mode === "signup" ? "active" : ""}
-              onClick={() => switchMode("signup")}
-            >
-              Signup
-            </button>
-          </div>
+          {showTabs && (
+            <div className="ex-main-tabs">
+              <button
+                type="button"
+                className={mode === "login" ? "active" : ""}
+                onClick={() => switchMode("login")}
+              >
+                Login
+              </button>
+              <button
+                type="button"
+                className={mode === "signup" ? "active" : ""}
+                onClick={() => switchMode("signup")}
+              >
+                Signup
+              </button>
+            </div>
+          )}
 
           {error && <div className="ex-alert ex-error">{error}</div>}
           {info && <div className="ex-alert ex-info">{info}</div>}
 
-          {mode === "login" ? (
+          {/* ================= LOGIN ================= */}
+          {mode === "login" && (
             <form className="ex-form" onSubmit={handleLogin}>
               <h2>Welcome Back!</h2>
               <p className="ex-sub">Login to your account</p>
@@ -385,13 +561,16 @@ export default function Auth({ onSuccess }) {
               <div className="ex-field">
                 <div className="ex-row-between">
                   <label>Password</label>
-                  <a
-                    href="#forgot"
-                    className="ex-link"
-                    onClick={(e) => e.preventDefault()}
+                  <button
+                    type="button"
+                    className="ex-link-btn"
+                    onClick={() => {
+                      // Email tab ki value forgot screen me le jao
+                      switchMode("forgot");
+                    }}
                   >
                     Forgot Password?
-                  </a>
+                  </button>
                 </div>
                 <PasswordInput
                   value={loginForm.password}
@@ -437,7 +616,10 @@ export default function Auth({ onSuccess }) {
                 </button>
               </p>
             </form>
-          ) : (
+          )}
+
+          {/* ================= SIGNUP ================= */}
+          {mode === "signup" && (
             <form className="ex-form" onSubmit={handleRegister}>
               <h2>Create Your Account</h2>
               <p className="ex-sub">Register to get started</p>
@@ -527,7 +709,7 @@ export default function Auth({ onSuccess }) {
               </label>
 
               <button className="ex-btn" disabled={loading}>
-                {loading ? "Please wait..." : "Register"}
+                {loading ? "Sending code..." : "Register"}
               </button>
 
               <p className="ex-foot">
@@ -540,6 +722,143 @@ export default function Auth({ onSuccess }) {
                   Login
                 </button>
               </p>
+            </form>
+          )}
+
+          {/* ============== VERIFY EMAIL (OTP) ============== */}
+          {mode === "verify" && (
+            <form className="ex-form" onSubmit={handleVerify}>
+              <h2>Verify Your Email</h2>
+              <p className="ex-sub">
+                Enter the 6-digit code sent to <b>{pendingEmail}</b>
+              </p>
+
+              <div className="ex-field">
+                <label>Verification Code</label>
+                <input
+                  className="ex-otp"
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={6}
+                  placeholder="------"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                  autoFocus
+                />
+              </div>
+
+              <button className="ex-btn" disabled={loading}>
+                {loading ? "Verifying..." : "Verify & Continue"}
+              </button>
+
+              <div className="ex-row-between ex-otp-actions">
+                {resendButton}
+                <button
+                  type="button"
+                  className="ex-link-btn"
+                  onClick={() => switchMode("login")}
+                >
+                  Back to login
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* ============== FORGOT PASSWORD (email) ============== */}
+          {mode === "forgot" && (
+            <form className="ex-form" onSubmit={handleForgot}>
+              <h2>Forgot Password?</h2>
+              <p className="ex-sub">
+                Enter your account email and we will send you a code.
+              </p>
+
+              <div className="ex-field">
+                <label>Email Address</label>
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={loginForm.email}
+                  onChange={setL("email")}
+                  required
+                  autoFocus
+                />
+              </div>
+
+              <button className="ex-btn" disabled={loading}>
+                {loading ? "Sending..." : "Send Code"}
+              </button>
+
+              <p className="ex-foot">
+                <button
+                  type="button"
+                  className="ex-link-btn"
+                  onClick={() => switchMode("login")}
+                >
+                  Back to login
+                </button>
+              </p>
+            </form>
+          )}
+
+          {/* ============== RESET PASSWORD (OTP + new password) ============== */}
+          {mode === "reset" && (
+            <form className="ex-form" onSubmit={handleReset}>
+              <h2>Reset Password</h2>
+              <p className="ex-sub">
+                Enter the code sent to <b>{pendingEmail}</b> and choose a new
+                password.
+              </p>
+
+              <div className="ex-field">
+                <label>Verification Code</label>
+                <input
+                  className="ex-otp"
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={6}
+                  placeholder="------"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                  autoFocus
+                />
+              </div>
+
+              <div className="ex-field">
+                <label>New Password</label>
+                <PasswordInput
+                  value={reset.password}
+                  onChange={(e) =>
+                    setReset({ ...reset, password: e.target.value })
+                  }
+                />
+              </div>
+
+              <div className="ex-field">
+                <label>Confirm New Password</label>
+                <PasswordInput
+                  value={reset.confirm}
+                  onChange={(e) =>
+                    setReset({ ...reset, confirm: e.target.value })
+                  }
+                />
+              </div>
+
+              <button className="ex-btn" disabled={loading}>
+                {loading ? "Updating..." : "Update Password"}
+              </button>
+
+              <div className="ex-row-between ex-otp-actions">
+                {resendButton}
+                <button
+                  type="button"
+                  className="ex-link-btn"
+                  onClick={() => switchMode("login")}
+                >
+                  Back to login
+                </button>
+              </div>
             </form>
           )}
         </section>
