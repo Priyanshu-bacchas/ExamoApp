@@ -14,6 +14,7 @@ import {
   register,
   verifyEmail,
   verifyLoginOtp,
+  googleLogin,
   resendOtp,
   forgotPassword,
   resetPassword,
@@ -298,6 +299,38 @@ export default function Auth({ onSuccess }) {
         );
       } else {
         setError(err.message || "Login failed");
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  /* ---------- GOOGLE LOGIN ---------- */
+
+  async function handleGoogle() {
+    setError("");
+    setInfo("");
+    setLoading(true);
+
+    try {
+      await googleLogin(loginForm.remember);
+      onSuccess?.();
+    } catch (err) {
+      const code = err?.code || "";
+
+      if (
+        code === "auth/popup-closed-by-user" ||
+        code === "auth/cancelled-popup-request"
+      ) {
+        // User ne popup band kar diya: error nahi dikhana
+      } else if (code === "auth/popup-blocked") {
+        setError("Popup was blocked. Please allow popups and try again.");
+      } else if (code === "auth/unauthorized-domain") {
+        setError(
+          "This domain is not authorised in Firebase. Add it under Authentication > Settings > Authorized domains."
+        );
+      } else {
+        setError(err.message || "Google login failed");
       }
     } finally {
       setLoading(false);
@@ -626,9 +659,8 @@ export default function Auth({ onSuccess }) {
               <button
                 type="button"
                 className="ex-btn-outline"
-                onClick={() =>
-                  setError("Google login is not connected to the backend yet.")
-                }
+                disabled={loading}
+                onClick={handleGoogle}
               >
                 <b>G</b> Continue with Google
               </button>

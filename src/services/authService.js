@@ -1,4 +1,5 @@
 import { apiPost } from "./api";
+import { googlePopup } from "../firebase";
 
 const TOKEN_KEY = "examo_token";
 const USER_KEY = "examo_user";
@@ -127,6 +128,28 @@ export async function verifyLoginOtp(email, otp, remember = true) {
 
   if (!token) {
     throw new Error("Login verified, but token was not returned.");
+  }
+
+  saveSession(token, user, remember);
+
+  return { token, user };
+}
+
+// Google login: Firebase popup -> ID token -> backend -> Examo token
+export async function googleLogin(remember = true) {
+  const result = await googlePopup();
+
+  const idToken = await result.user.getIdToken();
+
+  const response = await apiPost("/Auth/firebase", {
+    idToken,
+    fullName: result.user.displayName || undefined,
+  });
+
+  const { token, user } = normalizeAuthResponse(response);
+
+  if (!token) {
+    throw new Error("Google login done, but token was not returned.");
   }
 
   saveSession(token, user, remember);
