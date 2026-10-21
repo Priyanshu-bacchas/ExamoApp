@@ -101,7 +101,11 @@ async function request(endpoint, options = {}) {
         "You do not have access to this section (Admin only).";
     }
 
-    throw new Error(message);
+    const error = new Error(message);
+    error.status = response.status;
+    error.code = data?.code;   // e.g. EMAIL_NOT_VERIFIED
+    error.data = data;
+    throw error;
   }
 
   return data;

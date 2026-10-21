@@ -13,6 +13,7 @@ import {
   login,
   register,
   verifyEmail,
+  verifyLoginOtp,
   resendOtp,
   forgotPassword,
   resetPassword,
@@ -208,6 +209,7 @@ export default function Auth({ onSuccess }) {
   const [otp, setOtp] = useState("");
   const [cooldown, setCooldown] = useState(0);
   const [reset, setReset] = useState({ password: "", confirm: "" });
+  const [pendingLogin, setPendingLogin] = useState(null);
 
   const [loginForm, setLoginForm] = useState({
     email: "",
@@ -276,7 +278,18 @@ export default function Auth({ onSuccess }) {
       await login(identifier, loginForm.password, loginForm.remember);
       onSuccess?.();
     } catch (err) {
-      if (err.code === "EMAIL_NOT_VERIFIED" && err.data?.email) {
+      if (err.code === "LOGIN_OTP_REQUIRED" && err.data?.email) {
+        // Password sahi: ab email par aaya code chahiye
+        setPendingLogin({
+          identifier: loginTab === "email" ? loginForm.email : loginForm.mobile,
+          password: loginForm.password,
+        });
+        startOtpScreen(
+          "loginotp",
+          err.data.email,
+          `We sent a 6-digit login code to ${err.data.email}.`
+        );
+      } else if (err.code === "EMAIL_NOT_VERIFIED" && err.data?.email) {
         // Password sahi tha par email verify nahi thi -> OTP screen
         startOtpScreen(
           "verify",
@@ -350,7 +363,11 @@ export default function Auth({ onSuccess }) {
     setLoading(true);
 
     try {
-      await verifyEmail(pendingEmail, otp, loginForm.remember);
+      if (mode === "loginotp") {
+        await verifyLoginOtp(pendingEmail, otp, loginForm.remember);
+      } else {
+        await verifyEmail(pendingEmail, otp, loginForm.remember);
+      }
       onSuccess?.();
     } catch (err) {
       setError(err.message || "Verification failed");
@@ -368,6 +385,17 @@ export default function Auth({ onSuccess }) {
     try {
       if (mode === "reset") {
         await forgotPassword(pendingEmail);
+      } else if (mode === "loginotp") {
+        // Password dobara check hota hai, phir naya code jaata hai
+        try {
+          await login(
+            pendingLogin.identifier,
+            pendingLogin.password,
+            loginForm.remember
+          );
+        } catch (err) {
+          if (err.code !== "LOGIN_OTP_REQUIRED") throw err;
+        }
       } else {
         await resendOtp(pendingEmail);
       }
@@ -726,9 +754,9 @@ export default function Auth({ onSuccess }) {
           )}
 
           {/* ============== VERIFY EMAIL (OTP) ============== */}
-          {mode === "verify" && (
+          {(mode === "verify" || mode === "loginotp") && (
             <form className="ex-form" onSubmit={handleVerify}>
-              <h2>Verify Your Email</h2>
+              <h2>{mode === "loginotp" ? "Confirm Your Login" : "Verify Your Email"}</h2>
               <p className="ex-sub">
                 Enter the 6-digit code sent to <b>{pendingEmail}</b>
               </p>
@@ -749,7 +777,7 @@ export default function Auth({ onSuccess }) {
               </div>
 
               <button className="ex-btn" disabled={loading}>
-                {loading ? "Verifying..." : "Verify & Continue"}
+                {loading ? "Verifying..." : mode === "loginotp" ? "Login" : "Verify & Continue"}
               </button>
 
               <div className="ex-row-between ex-otp-actions">

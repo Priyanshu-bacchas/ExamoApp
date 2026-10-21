@@ -116,6 +116,24 @@ export async function verifyEmail(email, otp, remember = true) {
   return { token, user };
 }
 
+// Login OTP verify -> token milta hai
+export async function verifyLoginOtp(email, otp, remember = true) {
+  const response = await apiPost("/Auth/verify-login-otp", {
+    email: email.trim(),
+    otp: otp.trim(),
+  });
+
+  const { token, user } = normalizeAuthResponse(response);
+
+  if (!token) {
+    throw new Error("Login verified, but token was not returned.");
+  }
+
+  saveSession(token, user, remember);
+
+  return { token, user };
+}
+
 export function resendOtp(email) {
   return apiPost("/Auth/resend-otp", { email: email.trim() });
 }
