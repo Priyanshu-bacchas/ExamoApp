@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   Search,
@@ -11,12 +11,21 @@ import {
   CircleCheck,
 } from "lucide-react";
 
+import { getHelpContent, searchHelp } from "../services/helpService";
+
 import "./HelpSubscription.css";
 
-const featuredFaq = [
+// Card ke icons (title se match hote hain)
+const cardIcons = {
+  "Student Basics": GraduationCap,
+  "Exam Enrollment": CalendarDays,
+  "Technical Issues": Laptop,
+};
+
+// Backend na mile to ye dikhega
+const fallbackFeatured = [
   {
     title: "Student Basics",
-    icon: GraduationCap,
     tone: "mint",
     links: [
       "How to set up my student profile?",
@@ -26,7 +35,6 @@ const featuredFaq = [
   },
   {
     title: "Exam Enrollment",
-    icon: CalendarDays,
     tone: "lavender",
     links: [
       "How do I fill an exam form?",
@@ -36,7 +44,6 @@ const featuredFaq = [
   },
   {
     title: "Technical Issues",
-    icon: Laptop,
     tone: "sky",
     links: [
       "I can't log in to my account",
@@ -46,31 +53,47 @@ const featuredFaq = [
   },
 ];
 
-const faqs = [
+const fallbackFaqs = [
   {
-    q: "How to reset my password?",
-    a: "Go to the login page, click on 'Forgot password' and enter your registered email or mobile number. We will send you a link to set a new password.",
+    id: 1,
+    question: "How to reset my password?",
+    answer:
+      "On the login page click 'Forgot Password?', enter your registered email and we will send a 6-digit code. Enter the code, choose a new password and log in with it.",
   },
   {
-    q: "What payment methods are accepted?",
-    a: "We accept UPI, debit cards, credit cards and net banking for all paid plans.",
+    id: 2,
+    question: "What payment methods are accepted?",
+    answer:
+      "We accept UPI, debit cards, credit cards and net banking for all paid plans.",
   },
   {
-    q: "How can I change or cancel my plan?",
-    a: "Open the Subscription page from the sidebar. You can switch between the Monthly and Yearly plans, or go back to the Basic plan anytime.",
+    id: 3,
+    question: "How can I change or cancel my plan?",
+    answer:
+      "Open the Subscription page from the sidebar. You can switch between the Monthly and Yearly plans, or go back to the Basic plan anytime.",
   },
   {
-    q: "Is my data and uploaded documents safe?",
-    a: "Yes. Your exams, subjects, schedules and documents are visible only to your account.",
+    id: 4,
+    question: "Is my data and uploaded documents safe?",
+    answer:
+      "Yes. Your exams, subjects, schedules and documents are visible only to your account.",
   },
   {
-    q: "How do I download my payment receipt?",
-    a: "Go to Subscription > Previous Payments and click the Download button next to the payment.",
+    id: 5,
+    question: "How do I download my payment receipt?",
+    answer:
+      "Go to Subscription > Previous Payments and click the Download button next to the payment.",
   },
 ];
 
 function Help({ onNavigate }) {
+  const [featured, setFeatured] = useState(fallbackFeatured);
+  const [faqs, setFaqs] = useState(fallbackFaqs);
+
   const [query, setQuery] = useState("");
+  const [results, setResults] = useState(null); // null = search nahi ho raha
+  const [searchMessage, setSearchMessage] = useState("");
+  const [searching, setSearching] = useState(false);
   const [openIndex, setOpenIndex] = useState(0);
 
   const [contact, setContact] = useState({
@@ -81,17 +104,82 @@ function Help({ onNavigate }) {
   });
   const [sent, setSent] = useState(false);
 
-  const filteredFaqs = useMemo(() => {
-    const text = query.trim().toLowerCase();
+  // Featured cards + FAQ backend se
+  useEffect(() => {
+    let cancelled = false;
 
-    if (!text) return faqs;
+    getHelpContent()
+      .then((data) => {
+        if (cancelled || !data) return;
 
-    return faqs.filter(
-      (item) =>
-        item.q.toLowerCase().includes(text) ||
-        item.a.toLowerCase().includes(text)
-    );
+        if (Array.isArray(data.featured) && data.featured.length) {
+          setFeatured(data.featured);
+        }
+
+        if (Array.isArray(data.faqs) && data.faqs.length) {
+          setFaqs(data.faqs);
+        }
+      })
+      .catch(() => {
+        // Backend nahi mila: fallback content dikhega
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Search: type karne ke 0.35 sec baad backend se jawab
+  useEffect(() => {
+    const text = query.trim();
+
+    setOpenIndex(0);
+
+    if (!text) {
+      setResults(null);
+      setSearchMessage("");
+      setSearching(false);
+      return undefined;
+    }
+
+    let cancelled = false;
+    setSearching(true);
+
+    const timer = setTimeout(async () => {
+      try {
+        const data = await searchHelp(text);
+
+        if (cancelled) return;
+
+        setResults(Array.isArray(data?.results) ? data.results : []);
+        setSearchMessage(data?.message || "");
+      } catch {
+        if (cancelled) return;
+
+        // Backend na chale to local FAQ me dhoondho
+        const lower = text.toLowerCase();
+
+        setResults(
+          faqs.filter(
+            (item) =>
+              item.question.toLowerCase().includes(lower) ||
+              item.answer.toLowerCase().includes(lower)
+          )
+        );
+        setSearchMessage("");
+      } finally {
+        if (!cancelled) setSearching(false);
+      }
+    }, 350);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
+
+  const visibleFaqs = results ?? faqs;
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -99,7 +187,7 @@ function Help({ onNavigate }) {
     setSent(false);
   }
 
-  // Sirf frontend: abhi backend call nahi hai
+  // Contact Us abhi pehle jaisa hai (sirf frontend, backend call nahi)
   function handleSubmit(e) {
     e.preventDefault();
     setSent(true);
@@ -135,8 +223,8 @@ function Help({ onNavigate }) {
         <h2 className="hs-heading">Featured FAQ</h2>
 
         <div className="hs-card-grid">
-          {featuredFaq.map((card) => {
-            const Icon = card.icon;
+          {featured.map((card) => {
+            const Icon = cardIcons[card.title] || GraduationCap;
 
             return (
               <div className="hs-faq-card" key={card.title}>
@@ -162,33 +250,44 @@ function Help({ onNavigate }) {
           })}
         </div>
 
-        <h2 className="hs-heading">Frequently Asked Questions</h2>
+        <h2 className="hs-heading">
+          {results !== null
+            ? "Answers for your search"
+            : "Frequently Asked Questions"}
+        </h2>
 
         <div className="hs-accordion">
-          {filteredFaqs.length === 0 && (
+          {searching && results === null && (
+            <div className="hs-empty">Searching...</div>
+          )}
+
+          {!searching && visibleFaqs.length === 0 && (
             <div className="hs-empty">
-              No results found. Try a different keyword.
+              {searchMessage ||
+                "No results found. Try a different keyword."}
             </div>
           )}
 
-          {filteredFaqs.map((item, index) => {
+          {visibleFaqs.map((item, index) => {
             const open = openIndex === index;
 
             return (
               <div
                 className={`hs-acc-item ${open ? "open" : ""}`}
-                key={item.q}
+                key={item.id ?? item.question}
               >
                 <button
                   type="button"
                   className="hs-acc-head"
                   onClick={() => setOpenIndex(open ? -1 : index)}
                 >
-                  <span>{item.q}</span>
+                  <span>{item.question}</span>
                   <ChevronDown size={18} />
                 </button>
 
-                {open && <div className="hs-acc-body">{item.a}</div>}
+                {open && (
+                  <div className="hs-acc-body">{item.answer}</div>
+                )}
               </div>
             );
           })}
