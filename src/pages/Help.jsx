@@ -8,10 +8,10 @@ import {
   GraduationCap,
   CalendarDays,
   Laptop,
-  CircleCheck,
 } from "lucide-react";
 
 import { getHelpContent, searchHelp } from "../services/helpService";
+import ContactForm from "../components/ContactForm";
 
 import "./HelpSubscription.css";
 
@@ -96,13 +96,6 @@ function Help({ onNavigate }) {
   const [searching, setSearching] = useState(false);
   const [openIndex, setOpenIndex] = useState(0);
 
-  const [contact, setContact] = useState({
-    name: "",
-    email: "",
-    subject: "",
-    message: "",
-  });
-  const [sent, setSent] = useState(false);
 
   // Featured cards + FAQ backend se
   useEffect(() => {
@@ -180,19 +173,6 @@ function Help({ onNavigate }) {
   }, [query]);
 
   const visibleFaqs = results ?? faqs;
-
-  function handleChange(e) {
-    const { name, value } = e.target;
-    setContact((prev) => ({ ...prev, [name]: value }));
-    setSent(false);
-  }
-
-  // Contact Us abhi pehle jaisa hai (sirf frontend, backend call nahi)
-  function handleSubmit(e) {
-    e.preventDefault();
-    setSent(true);
-    setContact({ name: "", email: "", subject: "", message: "" });
-  }
 
   return (
     <div className="hs-page">
@@ -302,63 +282,7 @@ function Help({ onNavigate }) {
           to you.
         </p>
 
-        <form className="hs-contact" onSubmit={handleSubmit}>
-          <h3>Contact Us</h3>
-
-          <label>
-            Name
-            <input
-              name="name"
-              value={contact.name}
-              onChange={handleChange}
-              required
-            />
-          </label>
-
-          <label>
-            Email Address
-            <input
-              type="email"
-              name="email"
-              value={contact.email}
-              onChange={handleChange}
-              required
-            />
-          </label>
-
-          <label>
-            Subject
-            <input
-              name="subject"
-              value={contact.subject}
-              onChange={handleChange}
-              required
-            />
-          </label>
-
-          <label>
-            Message
-            <textarea
-              name="message"
-              rows={5}
-              placeholder="Message"
-              value={contact.message}
-              onChange={handleChange}
-              required
-            />
-          </label>
-
-          <button type="submit" className="hs-btn">
-            Submit
-          </button>
-
-          {sent && (
-            <div className="hs-success">
-              <CircleCheck size={16} />
-              Thanks! Your message has been submitted.
-            </div>
-          )}
-        </form>
+        <ContactForm />
 
         <div className="hs-contact-links">
           <div>
