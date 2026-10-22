@@ -4,6 +4,7 @@ import {
   Users,
   ShieldCheck,
   TrendingUp,
+  MessageSquare,
   Menu,
   X,
   LogOut,
@@ -17,7 +18,7 @@ import {
   isAdmin,
 } from "../services/authService";
 
-// Admin ko sirf ye 3 sections dikhte hain
+// Admin ke sections
 const menuItems = [
   {
     key: "dashboard",
@@ -38,6 +39,11 @@ const menuItems = [
     key: "analytics",
     label: "Analytics",
     icon: TrendingUp,
+  },
+  {
+    key: "help",
+    label: "Help & Support",
+    icon: MessageSquare,
   },
 ];
 
@@ -173,6 +179,7 @@ function getPageName(page) {
     users: "User & Role Management",
     logs: "Logs & Security",
     analytics: "Analytics",
+    help: "Help & Support",
   };
 
   return names[page] || "Dashboard Insights";

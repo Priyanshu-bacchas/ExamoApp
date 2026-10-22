@@ -1,19 +1,36 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CircleCheck, TriangleAlert } from "lucide-react";
 
 import { sendContactMessage } from "../services/supportService";
+import { getUser, getDisplayName } from "../services/authService";
 
 // Help page ka "Contact Us" form (same design, ab backend me save hota hai)
+// Name aur Email login wale account se aate hain (read-only). Backend bhi
+// inhe client se nahi leta, JWT wale user ke account se hi save karta hai.
 function ContactForm() {
+  const user = getUser();
+  const accountName = getDisplayName(user);
+  const accountEmail = user?.email || user?.Email || "";
+
   const [contact, setContact] = useState({
-    name: "",
-    email: "",
     subject: "",
     message: "",
   });
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
+
+  // Success / error message kuch seconds baad apne aap hat jaye
+  useEffect(() => {
+    if (!sent && !error) return;
+
+    const timer = setTimeout(() => {
+      setSent(false);
+      setError("");
+    }, 4000);
+
+    return () => clearTimeout(timer);
+  }, [sent, error]);
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -29,8 +46,6 @@ function ContactForm() {
     if (sending) return;
 
     const payload = {
-      name: contact.name.trim(),
-      email: contact.email.trim(),
       subject: contact.subject.trim(),
       message: contact.message.trim(),
     };
@@ -50,8 +65,8 @@ function ContactForm() {
 
       setSent(true);
 
-      // Sab fields saaf (naam aur email bhi)
-      setContact({ name: "", email: "", subject: "", message: "" });
+      // Subject aur message saaf (naam/email account se aate hain)
+      setContact({ subject: "", message: "" });
     } catch (err) {
       setError(
         err?.message || "Could not send your message. Please try again."
@@ -69,9 +84,10 @@ function ContactForm() {
         Name
         <input
           name="name"
-          value={contact.name}
-          onChange={handleChange}
-          required
+          value={accountName}
+          readOnly
+          disabled
+          title="Name is taken from your account"
         />
       </label>
 
@@ -80,9 +96,10 @@ function ContactForm() {
         <input
           type="email"
           name="email"
-          value={contact.email}
-          onChange={handleChange}
-          required
+          value={accountEmail}
+          readOnly
+          disabled
+          title="Email is taken from your account"
         />
       </label>
 

@@ -19,6 +19,7 @@ import ComingSoon from "./pages/ComingSoon";
 import AdminOverview from "./pages/AdminOverview";
 import AdminLogs from "./pages/AdminLogs";
 import AdminAnalytics from "./pages/AdminAnalytics";
+import AdminHelp from "./pages/AdminHelp";
 
 import {
   getUser,
@@ -53,13 +54,18 @@ function App() {
   const admin = isAdmin(user);
 
   // =====================================================
-  // ADMIN: sirf 3 sections
-  //   Dashboard Insights, User & Role Management, Logs & Security
+  // ADMIN sections:
+  //   Dashboard Insights, User & Role Management, Logs & Security,
+  //   Analytics, Help & Support
   // =====================================================
   if (admin) {
-    const adminPage = ["dashboard", "users", "logs", "analytics"].includes(
-      activePage
-    )
+    const adminPage = [
+      "dashboard",
+      "users",
+      "logs",
+      "analytics",
+      "help",
+    ].includes(activePage)
       ? activePage
       : "dashboard";
 
@@ -73,6 +79,9 @@ function App() {
 
         case "analytics":
           return <AdminAnalytics />;
+
+        case "help":
+          return <AdminHelp />;
 
         case "dashboard":
         default:

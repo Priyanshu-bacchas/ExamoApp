@@ -6,13 +6,15 @@ import {
   CircleCheck,
   Clock,
   Trash2,
+  Send,
 } from "lucide-react";
 
 import {
   getSupportMessages,
   updateSupportMessageStatus,
   deleteSupportMessage,
-} from "../services/adminService";
+  replyToSupportMessage,
+} from "../services/supportService";
 
 import "./AdminHelp.css";
 
@@ -35,6 +37,21 @@ function AdminHelp() {
 
   const [expandedId, setExpandedId] = useState(null);
   const [busyId, setBusyId] = useState(null);
+
+  // Reply box
+  const [replyId, setReplyId] = useState(null);
+  const [replyText, setReplyText] = useState("");
+  const [markResolved, setMarkResolved] = useState(true);
+  const [notice, setNotice] = useState("");
+
+  // Success notice kuch seconds baad hat jaye
+  useEffect(() => {
+    if (!notice) return;
+
+    const timer = setTimeout(() => setNotice(""), 5000);
+
+    return () => clearTimeout(timer);
+  }, [notice]);
 
   useEffect(() => {
     loadMessages();
@@ -75,6 +92,43 @@ function AdminHelp() {
       await loadMessages();
     } catch (err) {
       setError(err.message || "Unable to update the message.");
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  function openReply(item) {
+    setReplyId(replyId === item.id ? null : item.id);
+    setReplyText("");
+    setMarkResolved(true);
+    setError("");
+  }
+
+  async function sendReply(item) {
+    const text = replyText.trim();
+
+    if (text.length < 2) {
+      setError("Please write a reply first.");
+      return;
+    }
+
+    try {
+      setBusyId(item.id);
+      setError("");
+      setNotice("");
+
+      await replyToSupportMessage(item.id, {
+        reply: text,
+        markResolved,
+      });
+
+      setNotice(`Reply sent to ${item.email}.`);
+      setReplyId(null);
+      setReplyText("");
+
+      await loadMessages();
+    } catch (err) {
+      setError(err.message || "Unable to send the reply.");
     } finally {
       setBusyId(null);
     }
@@ -122,6 +176,8 @@ function AdminHelp() {
       </div>
 
       {error && <div className="adm-alert">{error}</div>}
+
+      {notice && <div className="adm-notice">{notice}</div>}
 
       <div className="adm-stats adm-help-stats">
         <StatCard
@@ -256,6 +312,12 @@ function AdminHelp() {
                         >
                           {item.status}
                         </span>
+
+                        {item.repliedAt && (
+                          <span className="adm-pill adm-pill-blue adm-help-replied">
+                            Replied
+                          </span>
+                        )}
                       </td>
                     </tr>,
 
@@ -296,16 +358,88 @@ function AdminHelp() {
                               {item.message}
                             </div>
 
+                            {item.adminReply && (
+                              <div className="adm-help-sent">
+                                <div className="adm-help-sent-head">
+                                  Last reply
+                                  {item.repliedBy
+                                    ? ` by ${item.repliedBy}`
+                                    : ""}
+                                  {" · "}
+                                  {formatDateTime(item.repliedAt)}
+                                </div>
+
+                                <div className="adm-help-sent-body">
+                                  {item.adminReply}
+                                </div>
+                              </div>
+                            )}
+
+                            {replyId === item.id && (
+                              <div className="adm-help-reply">
+                                <label htmlFor={`reply-${item.id}`}>
+                                  Reply to {item.email}
+                                </label>
+
+                                <textarea
+                                  id={`reply-${item.id}`}
+                                  rows={6}
+                                  maxLength={5000}
+                                  placeholder="Write your reply. It will be emailed to the student."
+                                  value={replyText}
+                                  onChange={(e) =>
+                                    setReplyText(e.target.value)
+                                  }
+                                  disabled={busy}
+                                />
+
+                                <label className="adm-help-check">
+                                  <input
+                                    type="checkbox"
+                                    checked={markResolved}
+                                    onChange={(e) =>
+                                      setMarkResolved(e.target.checked)
+                                    }
+                                    disabled={busy}
+                                  />
+                                  Mark as resolved after sending
+                                </label>
+
+                                <div className="adm-help-actions">
+                                  <button
+                                    type="button"
+                                    className="primary-button"
+                                    disabled={busy}
+                                    onClick={() => sendReply(item)}
+                                  >
+                                    <Send size={15} />
+                                    {busy ? "Sending..." : "Send reply"}
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    className="adm-btn"
+                                    disabled={busy}
+                                    onClick={() => setReplyId(null)}
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+
                             <div className="adm-help-actions">
-                              <a
+                              <button
+                                type="button"
                                 className="adm-btn"
-                                href={`mailto:${item.email}?subject=${encodeURIComponent(
-                                  `Re: ${item.subject}`
-                                )}`}
+                                disabled={busy}
+                                onClick={() => openReply(item)}
                               >
                                 <Mail size={15} />
-                                Reply by email
-                              </a>
+                                {item.adminReply
+                                  ? "Reply again"
+                                  : "Reply"}
+                              </button>
 
                               <button
                                 type="button"

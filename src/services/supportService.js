@@ -22,3 +22,8 @@ export const updateSupportMessageStatus = (id, status) =>
 
 export const deleteSupportMessage = (id) =>
   apiDelete(`/Help/messages/${id}`);
+
+// Admin reply -> student ko email (Resend) se jaata hai
+// data = { reply, markResolved }
+export const replyToSupportMessage = (id, data) =>
+  apiPost(`/Help/messages/${id}/reply`, data);
