@@ -1,0 +1,376 @@
+/* ===== Student > Notifications page ===== */
+
+.nt-page {
+  max-width: 900px;
+}
+
+.nt-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.nt-header h1 {
+  margin: 0 0 4px;
+  font-size: 24px;
+  color: var(--text);
+}
+
+.nt-header p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.nt-header-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.nt-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 14px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text);
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.nt-btn:hover:not(:disabled) {
+  background: var(--blue-light);
+  border-color: #bfdbfe;
+  color: var(--blue);
+}
+
+.nt-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.nt-btn-danger {
+  color: #b91c1c;
+}
+
+.nt-btn-danger:hover:not(:disabled) {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #b91c1c;
+}
+
+.nt-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.nt-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--muted);
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.nt-tab.active {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+}
+
+.nt-tab-count {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nt-alert {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+
+.nt-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.nt-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nt-item {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.2s;
+}
+
+.nt-item:last-child {
+  border-bottom: 0;
+}
+
+.nt-item.unread {
+  background: #f5f9ff;
+}
+
+.nt-item:hover {
+  background: #f8fafc;
+}
+
+.nt-item-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 8px 16px 18px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+.nt-icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nt-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.nt-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nt-title-row strong {
+  font-size: 14.5px;
+  color: var(--text);
+}
+
+.nt-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--blue);
+  flex-shrink: 0;
+}
+
+.nt-message {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: #4a5568;
+  word-break: break-word;
+}
+
+.nt-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.nt-tag {
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.nt-delete {
+  flex-shrink: 0;
+  align-self: center;
+  width: 34px;
+  height: 34px;
+  margin-right: 14px;
+  border: 0;
+  background: transparent;
+  color: #9aa5b8;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.nt-delete:hover {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+/* tones (icon box + tag) */
+.nt-tone-blue {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.nt-tone-amber {
+  background: #fffbeb;
+  color: #b45309;
+}
+
+.nt-tone-violet {
+  background: #f5f3ff;
+  color: #6d28d9;
+}
+
+.nt-tone-red {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.nt-tone-green {
+  background: #ecfdf3;
+  color: #15803d;
+}
+
+.nt-empty {
+  padding: 56px 24px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.nt-empty-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 14px;
+  border-radius: 16px;
+  background: var(--blue-light);
+  color: var(--blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nt-empty h3 {
+  margin: 0 0 6px;
+  font-size: 17px;
+  color: var(--text);
+}
+
+.nt-empty p {
+  margin: 0 auto;
+  max-width: 380px;
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+/* ===== Topbar bell + sidebar badge (Layout.jsx me use hote hain) ===== */
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.nt-bell {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text);
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.nt-bell:hover {
+  background: var(--blue-light);
+  color: var(--blue);
+}
+
+.nt-bell-badge {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  box-sizing: border-box;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nt-sidebar-badge {
+  margin-left: auto;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 640px) {
+  .nt-item-main {
+    padding-left: 14px;
+  }
+
+  .nt-delete {
+    margin-right: 8px;
+  }
+}

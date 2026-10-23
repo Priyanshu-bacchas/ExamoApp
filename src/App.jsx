@@ -16,6 +16,7 @@ import Documents from "./pages/Documents";
 import Help from "./pages/Help";
 import Subscription from "./pages/Subscription";
 import ComingSoon from "./pages/ComingSoon";
+import Notifications from "./pages/Notifications";
 import AdminOverview from "./pages/AdminOverview";
 import AdminLogs from "./pages/AdminLogs";
 import AdminAnalytics from "./pages/AdminAnalytics";
@@ -133,8 +134,10 @@ function App() {
         return <Documents />;
 
       case "jobs":
-      case "notifications":
         return <ComingSoon page={activePage} />;
+
+      case "notifications":
+        return <Notifications onNavigate={setActivePage} />;
 
       case "help":
         return <Help onNavigate={setActivePage} />;

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import {
   LayoutDashboard,
@@ -21,7 +21,13 @@ import {
   getRoleLabel,
 } from "../services/authService";
 
+import {
+  getUnreadCount,
+  NOTIFICATIONS_CHANGED,
+} from "../services/notificationService";
+
 import "./Layout.css";
+import "../pages/Notifications.css";
 
 // Help icon (circle + question mark) - inline SVG
 function HelpIcon({ size = 18 }) {
@@ -99,6 +105,36 @@ function Layout({
 
   const [studentOpen, setStudentOpen] = useState(true);
 
+  // Unread notifications (topbar bell + sidebar badge)
+  const [unread, setUnread] = useState(0);
+
+  const refreshUnread = useCallback(async () => {
+    try {
+      const data = await getUnreadCount();
+      setUnread(Number(data?.unreadCount) || 0);
+    } catch {
+      // bell chhupi rehne do, page nahi tootna chahiye
+    }
+  }, []);
+
+  // Page badalne par + har 1 minute me + notifications badalne par refresh
+  useEffect(() => {
+    refreshUnread();
+  }, [activePage, refreshUnread]);
+
+  useEffect(() => {
+    const timer = setInterval(refreshUnread, 60000);
+
+    window.addEventListener(NOTIFICATIONS_CHANGED, refreshUnread);
+
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener(NOTIFICATIONS_CHANGED, refreshUnread);
+    };
+  }, [refreshUnread]);
+
+  const unreadLabel = unread > 99 ? "99+" : unread;
+
   function renderItem(item) {
     const Icon = item.icon;
 
@@ -113,6 +149,10 @@ function Layout({
       >
         <Icon size={18} />
         <span>{item.label}</span>
+
+        {item.key === "notifications" && unread > 0 && (
+          <span className="nt-sidebar-badge">{unreadLabel}</span>
+        )}
       </button>
     );
   }
@@ -225,12 +265,28 @@ function Layout({
             <strong>{pageNames[activePage] || "Dashboard"}</strong>
           </div>
 
-          <div className="topbar-profile">
-            <div className="avatar">{initial}</div>
+          <div className="topbar-actions">
+            <button
+              type="button"
+              className="nt-bell"
+              onClick={() => onNavigate("notifications")}
+              aria-label="Notifications"
+              title="Notifications"
+            >
+              <Bell size={19} />
 
-            <div>
-              <strong>{displayName}</strong>
-              <span>{roleLabel}</span>
+              {unread > 0 && (
+                <span className="nt-bell-badge">{unreadLabel}</span>
+              )}
+            </button>
+
+            <div className="topbar-profile">
+              <div className="avatar">{initial}</div>
+
+              <div>
+                <strong>{displayName}</strong>
+                <span>{roleLabel}</span>
+              </div>
             </div>
           </div>
         </header>
