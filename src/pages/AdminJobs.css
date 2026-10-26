@@ -1,0 +1,31 @@
+/* ===== Admin > Jobs (Latest Jobs / Results / Admit Cards) ===== */
+
+.adm-jobs-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.adm-jobs-tab {
+  padding: 8px 18px;
+  border: 1px solid #dbe2ee;
+  background: #fff;
+  color: #4a5568;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.adm-jobs-tab:hover {
+  background: #f1f5ff;
+  color: #2563eb;
+}
+
+.adm-jobs-tab.active {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+}

@@ -288,7 +288,7 @@ function Help({ onNavigate }) {
           <div>
             <Mail size={16} />
             <strong>Email Support</strong>
-            <span>support@examo.com</span>
+            <span>examoaspirant@gmail.com</span>
           </div>
 
           <div>

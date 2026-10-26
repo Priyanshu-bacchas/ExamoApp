@@ -5,6 +5,7 @@ import {
   ShieldCheck,
   TrendingUp,
   MessageSquare,
+  Briefcase,
   Menu,
   X,
   LogOut,
@@ -39,6 +40,11 @@ const menuItems = [
     key: "analytics",
     label: "Analytics",
     icon: TrendingUp,
+  },
+  {
+    key: "jobs",
+    label: "Jobs",
+    icon: Briefcase,
   },
   {
     key: "help",
@@ -179,6 +185,7 @@ function getPageName(page) {
     users: "User & Role Management",
     logs: "Logs & Security",
     analytics: "Analytics",
+    jobs: "Jobs",
     help: "Help & Support",
   };
 

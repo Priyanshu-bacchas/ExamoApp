@@ -15,12 +15,13 @@ import Schedules from "./pages/Schedules";
 import Documents from "./pages/Documents";
 import Help from "./pages/Help";
 import Subscription from "./pages/Subscription";
-import ComingSoon from "./pages/ComingSoon";
 import Notifications from "./pages/Notifications";
 import AdminOverview from "./pages/AdminOverview";
 import AdminLogs from "./pages/AdminLogs";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import AdminHelp from "./pages/AdminHelp";
+import AdminJobs from "./pages/AdminJobs";
+import Jobs from "./pages/Jobs";
 
 import {
   getUser,
@@ -65,6 +66,7 @@ function App() {
       "users",
       "logs",
       "analytics",
+      "jobs",
       "help",
     ].includes(activePage)
       ? activePage
@@ -80,6 +82,9 @@ function App() {
 
         case "analytics":
           return <AdminAnalytics />;
+
+        case "jobs":
+          return <AdminJobs />;
 
         case "help":
           return <AdminHelp />;
@@ -134,7 +139,7 @@ function App() {
         return <Documents />;
 
       case "jobs":
-        return <ComingSoon page={activePage} />;
+        return <Jobs />;
 
       case "notifications":
         return <Notifications onNavigate={setActivePage} />;

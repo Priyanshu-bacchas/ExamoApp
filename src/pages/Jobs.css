@@ -1,0 +1,100 @@
+/* ===== Student > Jobs (Latest Jobs / Admit Card / Results) ===== */
+
+.jobs-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.jobs-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 18px;
+  border: 1px solid #dbe2ee;
+  background: #fff;
+  color: #4a5568;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.jobs-tab:hover {
+  background: #f1f5ff;
+  color: #2563eb;
+}
+
+.jobs-tab.active {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+}
+
+.jobs-name {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.jobs-chip {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: #fef3c7;
+  color: #a16207;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.jobs-chip.urgent {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.jobs-add-btn,
+.jobs-open-btn {
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 18px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--blue);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.jobs-add-btn:hover,
+.jobs-open-btn:hover {
+  filter: brightness(0.92);
+}
+
+.jobs-add-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.jobs-add-btn.added {
+  background: #16a34a;
+  opacity: 1;
+}
+
+.jobs-notice {
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  background: #f0fdf4;
+  color: #15803d;
+  font-size: 13px;
+  font-weight: 600;
+}
