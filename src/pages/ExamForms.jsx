@@ -1,4 +1,8 @@
+import { useEffect, useState } from "react";
+
 import CrudPage from "../components/CrudPage";
+import VideoButton from "../components/VideoButton";
+import { getJobPosts } from "../services/jobService";
 import {
   getExamForms,
   createExamForm,
@@ -6,12 +10,50 @@ import {
   deleteExamForm,
 } from "../services/examFormService";
 
+// Naam match ke liye: chhote akshar, extra space hata ke
+function nameKey(value) {
+  return (value || "").trim().replace(/\s+/g, " ").toLowerCase();
+}
+
 function ExamForms() {
+  // Admin ke "Exam" section ki entries: exam form ka naam -> video link
+  const [videos, setVideos] = useState({});
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadVideos() {
+      try {
+        const data = await getJobPosts("Exam");
+        const map = {};
+
+        // Pehle naya (upar) rakhna hai, isliye pehli entry hi chalti hai
+        (Array.isArray(data) ? data : []).forEach((entry) => {
+          const key = nameKey(entry.examName);
+
+          if (key && entry.details && !map[key]) map[key] = entry.details;
+        });
+
+        if (!cancelled) setVideos(map);
+      } catch (err) {
+        // Video na aaye to bhi Exam Forms chalte rahenge
+        console.error(err);
+      }
+    }
+
+    loadVideos();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <CrudPage
       title="Exam Forms"
       description="Manage examination application forms and deadlines."
       emptyMessage="No exam forms found."
+      statusOnlyEdit
       service={{
         get: getExamForms,
         create: createExamForm,
@@ -46,6 +88,16 @@ function ExamForms() {
             >
               {item.status || "Pending"}
             </span>
+          ),
+        },
+        {
+          key: "details",
+          label: "Details",
+          render: (item) => (
+            <VideoButton
+              url={videos[nameKey(item.examName)]}
+              title={item.examName}
+            />
           ),
         },
         {
@@ -90,6 +142,7 @@ function ExamForms() {
           type: "select",
           options: ["Filled", "Pending"],
           defaultValue: "Pending",
+          editableOnEdit: true,
           required: true,
         },
         {

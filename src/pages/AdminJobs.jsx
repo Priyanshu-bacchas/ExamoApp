@@ -12,6 +12,7 @@ import "./AdminJobs.css";
 
 const TABS = [
   { key: "Job", label: "Latest Jobs" },
+  { key: "Exam", label: "Exam" },
   { key: "Result", label: "Results" },
   { key: "AdmitCard", label: "Admit Cards" },
 ];
@@ -22,7 +23,10 @@ const STATUS_OPTIONS = ["Out", "Upcoming"];
 function clean(category, data) {
   const payload = { ...data, category };
 
-  ["startDate", "lastDate", "examDate", "syllabus", "postDate", "status"].forEach((key) => {
+  // Exam section me link nahi hota - backend ko khaali string bhejo
+  if (payload.link === undefined || payload.link === null) payload.link = "";
+
+  ["startDate", "lastDate", "examDate", "syllabus", "details", "postDate", "status"].forEach((key) => {
     if (payload[key] === "") payload[key] = null;
   });
 
@@ -40,6 +44,7 @@ function makeService(category) {
 
 const SERVICES = {
   Job: makeService("Job"),
+  Exam: makeService("Exam"),
   Result: makeService("Result"),
   AdmitCard: makeService("AdmitCard"),
 };
@@ -81,6 +86,33 @@ function syllabusCell(item) {
     : item.syllabus;
 }
 
+// Details = YouTube video link (table me "Watch" link)
+function detailsCell(item) {
+  if (!item.details || !/^https?:\/\//i.test(item.details)) return "-";
+
+  return (
+    <a
+      className="table-link"
+      href={item.details}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Watch
+    </a>
+  );
+}
+
+const detailsField = {
+  name: "details",
+  label: "Details (YouTube link)",
+  type: "url",
+  fullWidth: true,
+  placeholder: "https://www.youtube.com/watch?v=... (optional)",
+};
+
+// Exam section me Details zaroori hai
+const examDetailsField = { ...detailsField, required: true };
+
 const linkField = {
   name: "link",
   label: "Link",
@@ -91,7 +123,7 @@ const linkField = {
 };
 
 const CONFIG = {
-  // ---- Latest Jobs: Exam Name, Start Date, Last Date, Exam Date, Syllabus, Link ----
+  // ---- Latest Jobs: Exam Name, Start Date, Last Date, Exam Date, Syllabus, Details, Link ----
   Job: {
     title: "Latest Job",
     description: "Jobs shown to students in the Jobs section.",
@@ -102,6 +134,7 @@ const CONFIG = {
       { key: "lastDate", label: "Last Date", type: "date" },
       { key: "examDate", label: "Exam Date", type: "date" },
       { key: "syllabus", label: "Syllabus", render: syllabusCell },
+      { key: "details", label: "Details", render: detailsCell },
       { key: "link", label: "Link", render: linkCell },
     ],
     fields: [
@@ -116,11 +149,34 @@ const CONFIG = {
         fullWidth: true,
         placeholder: "Syllabus / topics (optional)",
       },
+      detailsField,
       linkField,
     ],
   },
 
-  // ---- Result: Exam Name, Date, Status, Link ----
+  // ---- Exam: Exam Form (naam), Details (video link) ----
+  Exam: {
+    title: "Exam",
+    description:
+      "Exam form ke naam ke saath video link do. Student ke Exam Forms page par isi naam ke saamne video dikhta hai.",
+    emptyMessage: "No exam details added yet.",
+    columns: [
+      { key: "examName", label: "Exam Form" },
+      { key: "details", label: "Details", render: detailsCell },
+    ],
+    fields: [
+      {
+        name: "examName",
+        label: "Exam Form",
+        required: true,
+        fullWidth: true,
+        placeholder: "Exam form ka naam (student ke Exam Name jaisa)",
+      },
+      examDetailsField,
+    ],
+  },
+
+  // ---- Result: Exam Name, Date, Status, Details, Link ----
   Result: {
     title: "Result",
     description: "Results shown to students on the Notifications page.",
@@ -129,6 +185,7 @@ const CONFIG = {
       { key: "examName", label: "Exam Name" },
       { key: "postDate", label: "Date", type: "date" },
       { key: "status", label: "Status", render: statusCell },
+      { key: "details", label: "Details", render: detailsCell },
       { key: "link", label: "Link", render: linkCell },
     ],
     fields: [
@@ -142,11 +199,12 @@ const CONFIG = {
         defaultValue: "Out",
         required: true,
       },
+      detailsField,
       linkField,
     ],
   },
 
-  // ---- Admit Card: Exam Name, Date, Status, Link ----
+  // ---- Admit Card: Exam Name, Date, Status, Details, Link ----
   AdmitCard: {
     title: "Admit Card",
     description: "Admit cards shown to students on the Notifications page.",
@@ -155,6 +213,7 @@ const CONFIG = {
       { key: "examName", label: "Exam Name" },
       { key: "postDate", label: "Date", type: "date" },
       { key: "status", label: "Status", render: statusCell },
+      { key: "details", label: "Details", render: detailsCell },
       { key: "link", label: "Link", render: linkCell },
     ],
     fields: [
@@ -168,6 +227,7 @@ const CONFIG = {
         defaultValue: "Out",
         required: true,
       },
+      detailsField,
       linkField,
     ],
   },

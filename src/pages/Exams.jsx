@@ -14,6 +14,7 @@ function Exams() {
       title="Exams"
       description="Manage upcoming and scheduled examinations."
       emptyMessage="No exams found."
+      statusOnlyEdit
       service={{
         get: getExams,
         create: createExam,
@@ -86,6 +87,7 @@ function Exams() {
           type: "select",
           required: true,
           defaultValue: "Coming Soon",
+          editableOnEdit: true,
           options: ["Done", "Coming Soon"],
         },
       ]}

@@ -139,7 +139,7 @@ function App() {
         return <Documents />;
 
       case "jobs":
-        return <Jobs />;
+        return <Jobs onNavigate={setActivePage} />;
 
       case "notifications":
         return <Notifications onNavigate={setActivePage} />;

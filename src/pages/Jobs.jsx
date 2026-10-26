@@ -6,6 +6,8 @@ import {
   Trophy,
   Plus,
   Check,
+  Play,
+  X,
 } from "lucide-react";
 
 import { getJobPosts, addJobToMyList } from "../services/jobService";
@@ -84,15 +86,48 @@ function safeUrl(value) {
   return value && /^https?:\/\//i.test(value) ? value : null;
 }
 
-function Jobs() {
+// YouTube link (watch / youtu.be / shorts / embed) se embed URL banata hai
+function youtubeEmbedUrl(value) {
+  try {
+    const url = new URL(value);
+    const host = url.hostname.replace(/^www\./, "").replace(/^m\./, "");
+
+    let id = null;
+
+    if (host === "youtu.be") {
+      id = url.pathname.slice(1).split("/")[0];
+    } else if (
+      host === "youtube.com" ||
+      host === "youtube-nocookie.com"
+    ) {
+      if (url.pathname === "/watch") {
+        id = url.searchParams.get("v");
+      } else {
+        const match = /^\/(embed|shorts|live|v)\/([^/?]+)/.exec(
+          url.pathname
+        );
+
+        id = match ? match[2] : null;
+      }
+    }
+
+    return id && /^[\w-]{6,20}$/.test(id)
+      ? `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function Jobs({ onNavigate }) {
   const [tab, setTab] = useState("Job");
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [reload, setReload] = useState(0);
   const [addingId, setAddingId] = useState(null);
-  const [addedIds, setAddedIds] = useState([]);
   const [notice, setNotice] = useState("");
+  const [video, setVideo] = useState(null);
 
   const current = TABS.find((x) => x.key === tab) || TABS[0];
 
@@ -129,26 +164,86 @@ function Jobs() {
     };
   }, [tab, reload]);
 
+  // Video popup: Escape dabane par band
+  useEffect(() => {
+    if (!video) return undefined;
+
+    function onKey(event) {
+      if (event.key === "Escape") setVideo(null);
+    }
+
+    window.addEventListener("keydown", onKey);
+
+    return () => window.removeEventListener("keydown", onKey);
+  }, [video]);
+
   // Job ko user ke Exam Forms, Exams, Preparation aur Results me add karta hai
   async function handleAdd(item) {
     try {
+      if (item.isAdded || addingId !== null) return;
+
       setAddingId(item.id);
       setError("");
       setNotice("");
 
       const data = await addJobToMyList(item.id);
 
-      setAddedIds((ids) => [...ids, item.id]);
+      // Job list me hi rehti hai, bas us row ka button disable ho jata hai
+      setItems((list) =>
+        list.map((x) => (x.id === item.id ? { ...x, isAdded: true } : x))
+      );
       setNotice(
         data?.message ||
           "Added to Exam Forms, Exams, Preparation and Results."
       );
+
+      // Add hote hi Exam Forms page par le jao
+      if (onNavigate) onNavigate("examForms");
     } catch (err) {
       console.error(err);
       setError(err.message || "Unable to add this job.");
     } finally {
       setAddingId(null);
     }
+  }
+
+  // Details = YouTube video. Valid ho to popup me chalta hai,
+  // warna link naye tab me khulta hai
+  function renderDetails(item) {
+    if (!item.details) return "-";
+
+    const embed = youtubeEmbedUrl(item.details);
+
+    if (embed) {
+      return (
+        <button
+          type="button"
+          className="jobs-video-btn"
+          onClick={() =>
+            setVideo({ title: item.examName, src: embed })
+          }
+        >
+          <Play size={13} />
+          Watch
+        </button>
+      );
+    }
+
+    const url = safeUrl(item.details);
+
+    return url ? (
+      <a
+        className="jobs-video-btn"
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <Play size={13} />
+        Watch
+      </a>
+    ) : (
+      "-"
+    );
   }
 
   function renderJobsTable() {
@@ -159,7 +254,7 @@ function Jobs() {
             <th>Exam Name</th>
             <th>Start Date</th>
             <th>Last Date</th>
-            <th>Exam Date</th>
+            <th>Details</th>
             <th className="actions-column">Action</th>
           </tr>
         </thead>
@@ -192,10 +287,10 @@ function Jobs() {
                   )}
                 </td>
 
-                <td>{formatDay(item.examDate)}</td>
+                <td>{renderDetails(item)}</td>
 
                 <td>
-                  {addedIds.includes(item.id) ? (
+                  {item.isAdded ? (
                     <button
                       type="button"
                       className="jobs-add-btn added"
@@ -232,6 +327,7 @@ function Jobs() {
             <th>Exam Name</th>
             <th>Date</th>
             <th>Status</th>
+            <th>Details</th>
             <th className="actions-column">Action</th>
           </tr>
         </thead>
@@ -259,6 +355,8 @@ function Jobs() {
                     {item.status || "-"}
                   </span>
                 </td>
+
+                <td>{renderDetails(item)}</td>
 
                 <td>
                   {url ? (
@@ -346,6 +444,40 @@ function Jobs() {
           </div>
         )}
       </div>
+
+      {video && (
+        <div
+          className="jobs-video-overlay"
+          onClick={() => setVideo(null)}
+        >
+          <div
+            className="jobs-video-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="jobs-video-head">
+              <strong>{video.title}</strong>
+
+              <button
+                type="button"
+                className="jobs-video-close"
+                onClick={() => setVideo(null)}
+                aria-label="Close video"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="jobs-video-frame">
+              <iframe
+                src={video.src}
+                title={video.title}
+                allow="accelerometer; autoplay; encrypted-media; picture-in-picture; fullscreen"
+                allowFullScreen
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

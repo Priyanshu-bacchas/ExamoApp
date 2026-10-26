@@ -12,6 +12,7 @@ function Results() {
       title="Results"
       description="Track the result of each exam you applied for."
       emptyMessage="No results found. Add an exam form and it appears here."
+      statusOnlyEdit
       service={{
         get: getResults,
         create: createResult,
@@ -41,6 +42,7 @@ function Results() {
           type: "select",
           options: ["Awaited", "Qualified", "Not Qualified"],
           defaultValue: "Awaited",
+          editableOnEdit: true,
           required: true,
         },
       ]}

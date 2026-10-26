@@ -15,6 +15,7 @@ function CrudPage({
   service,
   emptyMessage,
   extraActions,
+  statusOnlyEdit = false,
 }) {
   const [items, setItems] = useState([]);
   const [formData, setFormData] = useState({});
@@ -81,6 +82,12 @@ function CrudPage({
     setEditingId(item.id);
     setError("");
     setShowModal(true);
+  }
+
+  // statusOnlyEdit: naya record banate waqt sab fields chalte hain,
+  // par edit karte waqt sirf editableOnEdit wali field (status / result) chalti hai
+  function isFieldLocked(field) {
+    return Boolean(statusOnlyEdit && editingId && !field.editableOnEdit);
   }
 
   function closeModal() {
@@ -363,6 +370,7 @@ function CrudPage({
                     required={
                       field.required
                     }
+                    disabled={isFieldLocked(field)}
                   >
                     <option value="">
                       Select{" "}
@@ -397,6 +405,7 @@ function CrudPage({
                       field.required
                     }
                     rows={4}
+                    disabled={isFieldLocked(field)}
                   />
                 ) : field.type ===
                   "file" ? (
@@ -428,6 +437,7 @@ function CrudPage({
                       field.required
                     }
                     min={field.min}
+                    disabled={isFieldLocked(field)}
                   />
                 )}
               </div>

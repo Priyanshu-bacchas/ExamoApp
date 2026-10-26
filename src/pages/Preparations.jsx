@@ -12,6 +12,7 @@ function Preparations() {
       title="Preparation"
       description="Track your preparation progress for each exam."
       emptyMessage="No preparation records found."
+      statusOnlyEdit
       service={{
         get: getPreparations,
         create: createPreparation,
@@ -62,6 +63,7 @@ function Preparations() {
             "Completed",
           ],
           defaultValue: "Not Started",
+          editableOnEdit: true,
           required: true,
         },
       ]}
