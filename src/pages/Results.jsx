@@ -13,6 +13,7 @@ function Results() {
       description="Track the result of each exam you applied for."
       emptyMessage="No results found. Add an exam form and it appears here."
       statusOnlyEdit
+      hideAdd
       service={{
         get: getResults,
         create: createResult,

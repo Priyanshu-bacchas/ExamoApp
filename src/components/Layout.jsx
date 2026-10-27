@@ -176,6 +176,11 @@ function Layout({
           <div className="sidebar-group-title">Overview</div>
           {overviewItems.map(renderItem)}
 
+          <div className="sidebar-group-title">
+            Opportunities
+          </div>
+          {opportunityItems.map(renderItem)}
+
           <div className="sidebar-group-title">Academics</div>
 
           <button
@@ -222,11 +227,6 @@ function Layout({
               })}
             </div>
           </div>
-
-          <div className="sidebar-group-title">
-            Opportunities
-          </div>
-          {opportunityItems.map(renderItem)}
 
           <div className="sidebar-group-title">General</div>
           {generalItems.map(renderItem)}

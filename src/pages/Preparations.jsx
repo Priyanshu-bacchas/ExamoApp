@@ -13,6 +13,7 @@ function Preparations() {
       description="Track your preparation progress for each exam."
       emptyMessage="No preparation records found."
       statusOnlyEdit
+      hideAdd
       service={{
         get: getPreparations,
         create: createPreparation,

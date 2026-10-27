@@ -15,6 +15,7 @@ function Exams() {
       description="Manage upcoming and scheduled examinations."
       emptyMessage="No exams found."
       statusOnlyEdit
+      hideAdd
       service={{
         get: getExams,
         create: createExam,

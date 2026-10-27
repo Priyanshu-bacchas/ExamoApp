@@ -54,6 +54,7 @@ function ExamForms() {
       description="Manage examination application forms and deadlines."
       emptyMessage="No exam forms found."
       statusOnlyEdit
+      hideAdd
       service={{
         get: getExamForms,
         create: createExamForm,
