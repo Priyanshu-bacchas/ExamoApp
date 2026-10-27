@@ -4,16 +4,20 @@ import { apiGet, apiPost, apiPut, apiDelete } from "./api";
 //   activeOnly: true -> sirf wo Jobs jinki last date nikli nahi (students ke liye)
 export const getJobPosts = (
   category,
-  { activeOnly = false, take = 200 } = {}
+  { activeOnly = false, includeDrafts = false, take = 200 } = {}
 ) =>
   apiGet(
-    `/Jobs?category=${category}&activeOnly=${activeOnly}&take=${take}`
+    `/Jobs?category=${category}&activeOnly=${activeOnly}&includeDrafts=${includeDrafts}&take=${take}`
   );
 
 // Sirf Admin
 export const createJobPost = (data) => apiPost("/Jobs", data);
 
 export const updateJobPost = (id, data) => apiPut(`/Jobs/${id}`, data);
+
+// Sirf Admin: Draft <-> Published (published = true -> students ko dikhe)
+export const setJobPublished = (id, published) =>
+  apiPut(`/Jobs/${id}/publish`, { published });
 
 export const deleteJobPost = (id) => apiDelete(`/Jobs/${id}`);
 

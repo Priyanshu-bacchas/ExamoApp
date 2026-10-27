@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 
 import CrudPage from "../components/CrudPage";
 import {
@@ -6,6 +7,7 @@ import {
   createJobPost,
   updateJobPost,
   deleteJobPost,
+  setJobPublished,
 } from "../services/jobService";
 
 import "./AdminJobs.css";
@@ -33,11 +35,60 @@ function clean(category, data) {
   return payload;
 }
 
+function normName(value) {
+  return (value || "").trim().replace(/\s+/g, " ").toLowerCase();
+}
+
+// Same naam ki entry pehle se ho to admin ko warning (confirm karke save bhi kar sakta hai)
+async function warnIfDuplicate(category, name, excludeId) {
+  const key = normName(name);
+
+  if (!key) return;
+
+  const response = await getJobPosts(category, {
+    includeDrafts: true,
+    take: 500,
+  });
+
+  const list = Array.isArray(response) ? response : [];
+
+  // Edit me naam nahi badla ho to warning nahi
+  const self = excludeId ? list.find((x) => x.id === excludeId) : null;
+
+  if (self && normName(self.examName) === key) return;
+
+  const duplicate = list.find(
+    (x) => x.id !== excludeId && normName(x.examName) === key
+  );
+
+  if (!duplicate) return;
+
+  const where = TABS.find((t) => t.key === category)?.label || category;
+  const draftNote = duplicate.publishStatus === "Draft" ? " (Draft)" : "";
+
+  const ok = window.confirm(
+    `Duplicate warning\n\n"${duplicate.examName}" already exists in ${where}${draftNote}.\n\nDo you still want to save this entry?`
+  );
+
+  if (!ok) {
+    throw new Error("Not saved: an entry with this name already exists.");
+  }
+}
+
 function makeService(category) {
   return {
-    get: () => getJobPosts(category),
-    create: (data) => createJobPost(clean(category, data)),
-    update: (id, data) => updateJobPost(id, clean(category, data)),
+    // Admin ko Draft entries bhi dikhti hain
+    get: () => getJobPosts(category, { includeDrafts: true }),
+    create: async (data) => {
+      await warnIfDuplicate(category, data.examName, null);
+
+      return createJobPost(clean(category, data));
+    },
+    update: async (id, data) => {
+      await warnIfDuplicate(category, data.examName, id);
+
+      return updateJobPost(id, clean(category, data));
+    },
     delete: (id) => deleteJobPost(id),
   };
 }
@@ -62,6 +113,19 @@ function linkCell(item) {
     >
       Open
     </a>
+  );
+}
+
+// Published = students ko dikhta hai, Draft = sirf admin ko
+function visibilityCell(item) {
+  const draft = item.publishStatus === "Draft";
+
+  return (
+    <span
+      className={`status-badge ${draft ? "status-pending" : "status-filled"}`}
+    >
+      {draft ? "Draft" : "Published"}
+    </span>
   );
 }
 
@@ -113,6 +177,21 @@ const detailsField = {
 // Exam section me Details zaroori hai
 const examDetailsField = { ...detailsField, required: true };
 
+const visibilityField = {
+  name: "publishStatus",
+  label: "Visibility",
+  type: "select",
+  options: ["Published", "Draft"],
+  defaultValue: "Published",
+  required: true,
+};
+
+const visibilityColumn = {
+  key: "publishStatus",
+  label: "Visibility",
+  render: visibilityCell,
+};
+
 const linkField = {
   name: "link",
   label: "Link",
@@ -135,6 +214,7 @@ const CONFIG = {
       { key: "examDate", label: "Exam Date", type: "date" },
       { key: "syllabus", label: "Syllabus", render: syllabusCell },
       { key: "details", label: "Details", render: detailsCell },
+      visibilityColumn,
       { key: "link", label: "Link", render: linkCell },
     ],
     fields: [
@@ -151,6 +231,7 @@ const CONFIG = {
       },
       detailsField,
       linkField,
+      visibilityField,
     ],
   },
 
@@ -158,11 +239,12 @@ const CONFIG = {
   Exam: {
     title: "Exam",
     description:
-      "Exam form ke naam ke saath video link do. Student ke Exam Forms page par isi naam ke saamne video dikhta hai.",
-    emptyMessage: "No exam details added yet.",
+      "Entries Latest Job add karte hi apne aap ban jati hain (Draft). Edit me video link (Details) daalo aur Publish karo. Student ke Exam Forms page par isi naam ke saamne video dikhta hai.",
+    emptyMessage: "Entries appear here automatically when you add a Latest Job.",
     columns: [
       { key: "examName", label: "Exam Form" },
       { key: "details", label: "Details", render: detailsCell },
+      visibilityColumn,
     ],
     fields: [
       {
@@ -173,19 +255,22 @@ const CONFIG = {
         placeholder: "Exam form ka naam (student ke Exam Name jaisa)",
       },
       examDetailsField,
+      visibilityField,
     ],
   },
 
   // ---- Result: Exam Name, Date, Status, Details, Link ----
   Result: {
     title: "Result",
-    description: "Results shown to students on the Notifications page.",
-    emptyMessage: "No results added yet.",
+    description:
+      "Entries Latest Job add karte hi apne aap ban jati hain (Draft). Edit me date, status aur Details daalo, phir Publish karo.",
+    emptyMessage: "Entries appear here automatically when you add a Latest Job.",
     columns: [
       { key: "examName", label: "Exam Name" },
       { key: "postDate", label: "Date", type: "date" },
       { key: "status", label: "Status", render: statusCell },
       { key: "details", label: "Details", render: detailsCell },
+      visibilityColumn,
       { key: "link", label: "Link", render: linkCell },
     ],
     fields: [
@@ -201,19 +286,22 @@ const CONFIG = {
       },
       detailsField,
       linkField,
+      visibilityField,
     ],
   },
 
   // ---- Admit Card: Exam Name, Date, Status, Details, Link ----
   AdmitCard: {
     title: "Admit Card",
-    description: "Admit cards shown to students on the Notifications page.",
-    emptyMessage: "No admit cards added yet.",
+    description:
+      "Entries Latest Job add karte hi apne aap ban jati hain (Draft). Edit me date, status aur Details daalo, phir Publish karo.",
+    emptyMessage: "Entries appear here automatically when you add a Latest Job.",
     columns: [
       { key: "examName", label: "Exam Name" },
       { key: "postDate", label: "Date", type: "date" },
       { key: "status", label: "Status", render: statusCell },
       { key: "details", label: "Details", render: detailsCell },
+      visibilityColumn,
       { key: "link", label: "Link", render: linkCell },
     ],
     fields: [
@@ -229,6 +317,7 @@ const CONFIG = {
       },
       detailsField,
       linkField,
+      visibilityField,
     ],
   },
 };
@@ -237,6 +326,32 @@ function AdminJobs() {
   const [tab, setTab] = useState("Job");
 
   const config = CONFIG[tab];
+
+  async function togglePublish(item, reload) {
+    try {
+      await setJobPublished(item.id, item.publishStatus === "Draft");
+      await reload();
+    } catch (error) {
+      window.alert(error.message || "Could not change visibility.");
+    }
+  }
+
+  function extraActions(item, reload) {
+    const draft = item.publishStatus === "Draft";
+
+    return (
+      <>
+        <button
+          type="button"
+          className="edit-button"
+          title={draft ? "Publish (show to students)" : "Move to Draft (hide)"}
+          onClick={() => togglePublish(item, reload)}
+        >
+          {draft ? <Eye size={16} /> : <EyeOff size={16} />}
+        </button>
+      </>
+    );
+  }
 
   return (
     <div className="adm-jobs">
@@ -262,7 +377,10 @@ function AdminJobs() {
         service={SERVICES[tab]}
         columns={config.columns}
         fields={config.fields}
+        extraActions={extraActions}
+        hideAdd={tab !== "Job"}
       />
+
     </div>
   );
 }

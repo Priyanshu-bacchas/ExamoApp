@@ -43,7 +43,7 @@ const menuItems = [
   },
   {
     key: "jobs",
-    label: "Jobs",
+    label: "Content Manager",
     icon: Briefcase,
   },
   {
@@ -185,7 +185,7 @@ function getPageName(page) {
     users: "User & Role Management",
     logs: "Logs & Security",
     analytics: "Analytics",
-    jobs: "Jobs",
+    jobs: "Content Manager",
     help: "Help & Support",
   };
 

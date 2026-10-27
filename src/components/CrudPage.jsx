@@ -16,6 +16,7 @@ function CrudPage({
   emptyMessage,
   extraActions,
   statusOnlyEdit = false,
+  hideAdd = false,
 }) {
   const [items, setItems] = useState([]);
   const [formData, setFormData] = useState({});
@@ -223,13 +224,15 @@ function CrudPage({
             Refresh
           </button>
 
-          <button
-            className="primary-button"
-            onClick={openAdd}
-          >
-            <Plus size={18} />
-            Add
-          </button>
+          {!hideAdd && (
+            <button
+              className="primary-button"
+              onClick={openAdd}
+            >
+              <Plus size={18} />
+              Add
+            </button>
+          )}
         </div>
       </div>
 
@@ -255,10 +258,12 @@ function CrudPage({
                 "No records found"}
             </h3>
 
-            <p>
-              Add your first record using the
-              button above.
-            </p>
+            {!hideAdd && (
+              <p>
+                Add your first record using the
+                button above.
+              </p>
+            )}
           </div>
         ) : (
           <div className="table-container">
