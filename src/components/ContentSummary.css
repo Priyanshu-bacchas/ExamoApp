@@ -1,0 +1,88 @@
+/* ===== Content Manager: summary cards ===== */
+
+.cs-wrap {
+  margin-bottom: 18px;
+}
+
+.cs-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.cs-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 14px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.cs-label {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.cs-number {
+  color: #0f172a;
+  font-size: 28px;
+  line-height: 1.1;
+}
+
+.cs-sub {
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.cs-draft {
+  border-color: #fde68a;
+  background: #fffbeb;
+}
+
+.cs-published {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.cs-closing {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.cs-loading,
+.cs-error {
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.cs-loading {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.cs-error {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+@media (max-width: 1100px) {
+  .cs-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .cs-grid {
+    grid-template-columns: 1fr;
+  }
+}

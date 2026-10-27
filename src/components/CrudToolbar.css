@@ -1,0 +1,76 @@
+/* ===== Bulk bar / notice (CrudPage). Search box ka style admin.css (.adm-filters) se aata hai ===== */
+
+.crud-bulkbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  background: #eff6ff;
+  color: #1e3a8a;
+  font-size: 14px;
+}
+
+.crud-bulk-btn {
+  padding: 7px 14px;
+  border: 1px solid #93c5fd;
+  border-radius: 8px;
+  background: #fff;
+  color: #1d4ed8;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.crud-bulk-btn:hover {
+  background: #dbeafe;
+}
+
+.crud-bulk-btn.danger {
+  border-color: #fecaca;
+  color: #b91c1c;
+}
+
+.crud-bulk-btn.danger:hover {
+  background: #fee2e2;
+}
+
+.crud-bulk-btn:disabled,
+.crud-bulk-clear:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.crud-bulk-clear {
+  margin-left: auto;
+  padding: 7px 12px;
+  border: 0;
+  background: transparent;
+  color: #475569;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.crud-notice {
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  background: #f0fdf4;
+  color: #166534;
+  font-size: 14px;
+}
+
+.select-column {
+  width: 40px;
+  text-align: center;
+}
+
+.select-column input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}

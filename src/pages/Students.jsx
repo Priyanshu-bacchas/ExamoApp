@@ -210,8 +210,16 @@ function BlockAction({ item, onDone }) {
 function Students() {
   return (
     <CrudPage
-      title="User & Role Management"
+      title="User Management"
       emptyMessage="No users found."
+      searchKeys={["name", "email", "mobileNumber"]}
+      searchPlaceholder="Name, email ya mobile..."
+      filter={{
+        field: "role",
+        label: "Role",
+        allLabel: "All roles",
+        options: ["Student", "Admin"],
+      }}
       service={{
         get: getStudents,
         create: createStudent,

@@ -4,8 +4,11 @@ import {
   Pencil,
   Trash2,
   RefreshCw,
+  Search,
 } from "lucide-react";
 import Modal from "./Modal";
+
+import "./CrudToolbar.css";
 
 function CrudPage({
   title,
@@ -17,6 +20,12 @@ function CrudPage({
   extraActions,
   statusOnlyEdit = false,
   hideAdd = false,
+  // Optional: search box (searchKeys), dropdown filter (filter) aur
+  // tick box + bulk buttons (bulkActions). Na do to page pehle jaisa chalta hai.
+  searchKeys,
+  searchPlaceholder = "Search by name...",
+  filter,
+  bulkActions,
 }) {
   const [items, setItems] = useState([]);
   const [formData, setFormData] = useState({});
@@ -26,6 +35,13 @@ function CrudPage({
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+
+  const [queryInput, setQueryInput] = useState("");
+  const [query, setQuery] = useState("");
+  const [filterValue, setFilterValue] = useState("All");
+  const [selected, setSelected] = useState([]);
+  const [bulkRunning, setBulkRunning] = useState(false);
+  const [notice, setNotice] = useState("");
 
   useEffect(() => {
     loadData();
@@ -43,6 +59,13 @@ function CrudPage({
         : response?.data || [];
 
       setItems(data);
+
+      // Jo records ab nahi rahe unka tick hata do
+      setSelected((previous) =>
+        previous.filter((id) =>
+          data.some((item) => item.id === id)
+        )
+      );
     } catch (error) {
       console.error(error);
       setError(
@@ -50,6 +73,91 @@ function CrudPage({
       );
     } finally {
       setLoading(false);
+    }
+  }
+
+  // ---- Search / filter ----
+  const searchText = query.trim().toLowerCase();
+
+  const visibleItems = items.filter((item) => {
+    if (
+      filter &&
+      filterValue !== "All" &&
+      item[filter.field] !== filterValue
+    ) {
+      return false;
+    }
+
+    if (searchText && searchKeys?.length) {
+      const haystack = searchKeys
+        .map((key) => String(item[key] ?? ""))
+        .join(" ")
+        .toLowerCase();
+
+      return haystack.includes(searchText);
+    }
+
+    return true;
+  });
+
+  const showToolbar = Boolean(searchKeys?.length || filter);
+
+  // ---- Bulk select ----
+  const allVisibleSelected =
+    visibleItems.length > 0 &&
+    visibleItems.every((item) => selected.includes(item.id));
+
+  function toggleOne(id) {
+    setSelected((previous) =>
+      previous.includes(id)
+        ? previous.filter((value) => value !== id)
+        : [...previous, id]
+    );
+  }
+
+  function toggleAllVisible() {
+    setSelected((previous) => {
+      if (allVisibleSelected) {
+        return previous.filter(
+          (id) => !visibleItems.some((item) => item.id === id)
+        );
+      }
+
+      const merged = new Set(previous);
+
+      visibleItems.forEach((item) => merged.add(item.id));
+
+      return [...merged];
+    });
+  }
+
+  async function handleBulk(action) {
+    const chosen = items.filter((item) =>
+      selected.includes(item.id)
+    );
+
+    if (chosen.length === 0) return;
+
+    try {
+      setBulkRunning(true);
+      setError("");
+      setNotice("");
+
+      // run() false de to user ne Cancel kiya - kuch nahi badalna
+      const message = await action.run(chosen);
+
+      if (message === false) return;
+
+      if (message) setNotice(message);
+
+      setSelected([]);
+
+      await loadData();
+    } catch (error) {
+      console.error(error);
+      setError(error.message || "Bulk action failed.");
+    } finally {
+      setBulkRunning(false);
     }
   }
 
@@ -242,10 +350,113 @@ function CrudPage({
         </div>
       )}
 
+      {notice && (
+        <div className="crud-notice">{notice}</div>
+      )}
+
+      {showToolbar && (
+        <form
+          className="adm-filters"
+          onSubmit={(event) => {
+            event.preventDefault();
+            setQuery(queryInput);
+          }}
+        >
+          {searchKeys?.length > 0 && (
+            <div className="adm-field grow">
+              <label>Search</label>
+
+              <input
+                type="text"
+                value={queryInput}
+                onChange={(event) => {
+                  setQueryInput(event.target.value);
+
+                  // Box khaali karte hi poori list wapas
+                  if (event.target.value === "") setQuery("");
+                }}
+                placeholder={searchPlaceholder}
+              />
+            </div>
+          )}
+
+          {filter && (
+            <div className="adm-field">
+              <label>{filter.label}</label>
+
+              <select
+                value={filterValue}
+                onChange={(event) =>
+                  setFilterValue(event.target.value)
+                }
+              >
+                <option value="All">
+                  {filter.allLabel || `All ${filter.label}`}
+                </option>
+
+                {filter.options.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <button type="submit" className="primary-button">
+            Search
+          </button>
+
+          <span className="adm-count">
+            {visibleItems.length} record
+            {visibleItems.length === 1 ? "" : "s"}
+          </span>
+        </form>
+      )}
+
+      {bulkActions && selected.length > 0 && (
+        <div className="crud-bulkbar">
+          <strong>{selected.length} selected</strong>
+
+          {bulkActions.map((action) => (
+            <button
+              key={action.label}
+              type="button"
+              className={`crud-bulk-btn ${
+                action.danger ? "danger" : ""
+              }`}
+              onClick={() => handleBulk(action)}
+              disabled={bulkRunning}
+            >
+              {action.label}
+            </button>
+          ))}
+
+          <button
+            type="button"
+            className="crud-bulk-clear"
+            onClick={() => setSelected([])}
+            disabled={bulkRunning}
+          >
+            Clear
+          </button>
+        </div>
+      )}
+
       <div className="data-card">
         {loading ? (
           <div className="loading-state">
             Loading...
+          </div>
+        ) : items.length > 0 && visibleItems.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-icon">
+              <Search size={24} />
+            </div>
+
+            <h3>No entries match your search.</h3>
+
+            <p>Try a different name or filter.</p>
           </div>
         ) : items.length === 0 ? (
           <div className="empty-state">
@@ -270,6 +481,17 @@ function CrudPage({
             <table className="data-table">
               <thead>
                 <tr>
+                  {bulkActions && (
+                    <th className="select-column">
+                      <input
+                        type="checkbox"
+                        checked={allVisibleSelected}
+                        onChange={toggleAllVisible}
+                        aria-label="Select all"
+                      />
+                    </th>
+                  )}
+
                   {columns.map((column) => (
                     <th key={column.key}>
                       {column.label}
@@ -283,8 +505,19 @@ function CrudPage({
               </thead>
 
               <tbody>
-                {items.map((item) => (
+                {visibleItems.map((item) => (
                   <tr key={item.id}>
+                    {bulkActions && (
+                      <td className="select-column">
+                        <input
+                          type="checkbox"
+                          checked={selected.includes(item.id)}
+                          onChange={() => toggleOne(item.id)}
+                          aria-label="Select row"
+                        />
+                      </td>
+                    )}
+
                     {columns.map((column) => (
                       <td key={column.key}>
                         {column.render

@@ -2,6 +2,9 @@ import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 
 import CrudPage from "../components/CrudPage";
+import ContentSummary, {
+  CONTENT_CHANGED_EVENT,
+} from "../components/ContentSummary";
 import {
   getJobPosts,
   createJobPost,
@@ -75,6 +78,11 @@ async function warnIfDuplicate(category, name, excludeId) {
   }
 }
 
+// Counts wale cards ko batao ki kuch badla hai
+function notifyChanged() {
+  window.dispatchEvent(new Event(CONTENT_CHANGED_EVENT));
+}
+
 function makeService(category) {
   return {
     // Admin ko Draft entries bhi dikhti hain
@@ -82,14 +90,28 @@ function makeService(category) {
     create: async (data) => {
       await warnIfDuplicate(category, data.examName, null);
 
-      return createJobPost(clean(category, data));
+      const saved = await createJobPost(clean(category, data));
+
+      notifyChanged();
+
+      return saved;
     },
     update: async (id, data) => {
       await warnIfDuplicate(category, data.examName, id);
 
-      return updateJobPost(id, clean(category, data));
+      const saved = await updateJobPost(id, clean(category, data));
+
+      notifyChanged();
+
+      return saved;
     },
-    delete: (id) => deleteJobPost(id),
+    delete: async (id) => {
+      const result = await deleteJobPost(id);
+
+      notifyChanged();
+
+      return result;
+    },
   };
 }
 
@@ -330,11 +352,94 @@ function AdminJobs() {
   async function togglePublish(item, reload) {
     try {
       await setJobPublished(item.id, item.publishStatus === "Draft");
+      notifyChanged();
       await reload();
     } catch (error) {
       window.alert(error.message || "Could not change visibility.");
     }
   }
+
+  // ---- Bulk actions (tick karke ek saath) ----
+  async function bulkSetPublished(chosen, published) {
+    const targets = chosen.filter(
+      (item) => (item.publishStatus === "Draft") === published
+    );
+
+    if (targets.length === 0) {
+      return published
+        ? "All selected entries are already published."
+        : "All selected entries are already drafts.";
+    }
+
+    let done = 0;
+    const failed = [];
+
+    for (const item of targets) {
+      try {
+        await setJobPublished(item.id, published);
+        done += 1;
+      } catch (error) {
+        failed.push(`${item.examName} (${error.message || "failed"})`);
+      }
+    }
+
+    notifyChanged();
+
+    let message = `${done} ${published ? "published" : "moved to Draft"}.`;
+
+    if (failed.length > 0) {
+      message += ` ${failed.length} skipped: ${failed.join("; ")}`;
+    }
+
+    return message;
+  }
+
+  async function bulkDelete(chosen) {
+    const extra =
+      tab === "Job"
+        ? "\n\nThe Exam, Result and Admit Card entries created from these jobs will also be deleted."
+        : "";
+
+    const ok = window.confirm(
+      `Delete ${chosen.length} selected ${
+        chosen.length === 1 ? "entry" : "entries"
+      }? This cannot be undone.${extra}`
+    );
+
+    if (!ok) return false;
+
+    let done = 0;
+    const failed = [];
+
+    for (const item of chosen) {
+      try {
+        await SERVICES[tab].delete(item.id);
+        done += 1;
+      } catch (error) {
+        failed.push(`${item.examName} (${error.message || "failed"})`);
+      }
+    }
+
+    let message = `${done} deleted.`;
+
+    if (failed.length > 0) {
+      message += ` ${failed.length} failed: ${failed.join("; ")}`;
+    }
+
+    return message;
+  }
+
+  const bulkActions = [
+    {
+      label: "Publish selected",
+      run: (chosen) => bulkSetPublished(chosen, true),
+    },
+    {
+      label: "Move to Draft",
+      run: (chosen) => bulkSetPublished(chosen, false),
+    },
+    { label: "Delete selected", danger: true, run: bulkDelete },
+  ];
 
   function extraActions(item, reload) {
     const draft = item.publishStatus === "Draft";
@@ -355,6 +460,8 @@ function AdminJobs() {
 
   return (
     <div className="adm-jobs">
+      <ContentSummary />
+
       <div className="adm-jobs-tabs">
         {TABS.map((item) => (
           <button
@@ -379,6 +486,15 @@ function AdminJobs() {
         fields={config.fields}
         extraActions={extraActions}
         hideAdd={tab !== "Job"}
+        searchKeys={["examName"]}
+        searchPlaceholder="Exam name..."
+        filter={{
+          field: "publishStatus",
+          label: "Visibility",
+          allLabel: "All entries",
+          options: ["Draft", "Published"],
+        }}
+        bulkActions={bulkActions}
       />
 
     </div>

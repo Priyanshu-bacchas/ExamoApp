@@ -28,7 +28,7 @@ const menuItems = [
   },
   {
     key: "users",
-    label: "User & Role Management",
+    label: "User Management",
     icon: Users,
   },
   {
@@ -182,7 +182,7 @@ function AdminLayout({
 function getPageName(page) {
   const names = {
     dashboard: "Dashboard Insights",
-    users: "User & Role Management",
+    users: "User Management",
     logs: "Logs & Security",
     analytics: "Analytics",
     jobs: "Content Manager",
