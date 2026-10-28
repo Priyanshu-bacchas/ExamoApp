@@ -20,9 +20,6 @@ import {
 
 import "./HelpSubscription.css";
 
-// Default prices (backend se aaye to wahi dikhengi)
-const DEFAULT_PRICES = { monthly: 49, yearly: 199 };
-
 const plans = [
   {
     key: "basic",
@@ -162,12 +159,14 @@ function Subscription({ onNavigate }) {
     return () => window.removeEventListener("pageshow", handlePageShow);
   }, []);
 
-  // ---- Backend se aayi prices ----
-  const prices = { ...DEFAULT_PRICES };
+  // ---- Prices sirf backend se (load hone tak purani / galat price nahi dikhate) ----
+  const prices = {};
 
   (sub?.plans || []).forEach((p) => {
     prices[p.key] = p.amount;
   });
+
+  const pricesReady = Object.keys(prices).length > 0;
 
   const status = sub?.status || "";
 
@@ -193,12 +192,14 @@ function Subscription({ onNavigate }) {
           status === "Trial" && sub?.daysLeft > 0
             ? `${sub.daysLeft} day${sub.daysLeft === 1 ? "" : "s"} left`
             : "2 days free trial",
-        small: `Thereafter ₹${formatAmount(prices.monthly)}/month`,
+        small: pricesReady
+          ? `Thereafter ₹${formatAmount(prices.monthly)}/month`
+          : "Thereafter ...",
       };
     }
 
     return {
-      big: `₹${formatAmount(prices[plan.key])}`,
+      big: pricesReady ? `₹${formatAmount(prices[plan.key])}` : "₹ --",
       small: plan.small,
     };
   }
