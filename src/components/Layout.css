@@ -91,3 +91,14 @@
   color: white;
   box-shadow: inset 3px 0 0 var(--blue);
 }
+
+/* Free trial khatam: locked sections */
+.sidebar-item.is-locked,
+.sidebar-subitem.is-locked {
+  opacity: 0.55;
+}
+
+.sidebar-lock {
+  margin-left: auto;
+  flex-shrink: 0;
+}

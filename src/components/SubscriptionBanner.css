@@ -1,0 +1,60 @@
+/* ===== Trial / expired banner ===== */
+
+.sub-banner {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.sub-banner span {
+  flex: 1 1 240px;
+}
+
+.sub-banner button {
+  padding: 6px 14px;
+  border: 0;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sub-banner.trial {
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+  color: #1e3a8a;
+}
+
+.sub-banner.trial button {
+  background: #2563eb;
+}
+
+.sub-banner.expired {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.sub-banner.expired button {
+  background: #dc2626;
+}
+
+/* Subscription page: error box */
+.sub-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 14px;
+}

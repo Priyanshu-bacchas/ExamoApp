@@ -14,6 +14,7 @@ import {
   ChevronDown,
   Menu,
   LogOut,
+  Lock,
 } from "lucide-react";
 
 import {
@@ -74,6 +75,9 @@ const generalItems = [
   { key: "subscription", label: "Subscription", icon: CreditCard },
 ];
 
+// Trial khatam hone par sirf ye pages khule rehte hain
+const FREE_PAGES = ["help", "subscription"];
+
 const pageNames = {
   dashboard: "Dashboard",
   examForms: "Exam Forms",
@@ -94,6 +98,7 @@ function Layout({
   onNavigate,
   user,
   onLogout,
+  locked = false,
   children,
 }) {
   const displayName = getDisplayName(user);
@@ -109,13 +114,16 @@ function Layout({
   const [unread, setUnread] = useState(0);
 
   const refreshUnread = useCallback(async () => {
+    // Locked me notifications API band hai
+    if (locked) return;
+
     try {
       const data = await getUnreadCount();
       setUnread(Number(data?.unreadCount) || 0);
     } catch {
       // bell chhupi rehne do, page nahi tootna chahiye
     }
-  }, []);
+  }, [locked]);
 
   // Page badalne par + har 1 minute me + notifications badalne par refresh
   useEffect(() => {
@@ -135,6 +143,10 @@ function Layout({
 
   const unreadLabel = unread > 99 ? "99+" : unread;
 
+  function isLocked(key) {
+    return locked && !FREE_PAGES.includes(key);
+  }
+
   function renderItem(item) {
     const Icon = item.icon;
 
@@ -144,11 +156,15 @@ function Layout({
         type="button"
         className={`sidebar-item ${
           activePage === item.key ? "active" : ""
-        }`}
+        } ${isLocked(item.key) ? "is-locked" : ""}`}
         onClick={() => onNavigate(item.key)}
       >
         <Icon size={18} />
         <span>{item.label}</span>
+
+        {isLocked(item.key) && (
+          <Lock size={14} className="sidebar-lock" />
+        )}
 
         {item.key === "notifications" && unread > 0 && (
           <span className="nt-sidebar-badge">{unreadLabel}</span>
@@ -217,11 +233,15 @@ function Layout({
                     type="button"
                     className={`sidebar-subitem ${
                       activePage === item.key ? "active" : ""
-                    }`}
+                    } ${isLocked(item.key) ? "is-locked" : ""}`}
                     onClick={() => onNavigate(item.key)}
                   >
                     <Icon size={17} />
                     <span>{item.label}</span>
+
+                    {isLocked(item.key) && (
+                      <Lock size={13} className="sidebar-lock" />
+                    )}
                   </button>
                 );
               })}

@@ -76,6 +76,11 @@ async function request(endpoint, options = {}) {
       );
     }
 
+    // Free trial khatam + plan nahi: App ko batao, wo Subscription page par bhej dega
+    if (response.status === 402) {
+      window.dispatchEvent(new Event("subscription-required"));
+    }
+
     let message = `API Error: ${response.status}`;
 
     if (data?.message) {
