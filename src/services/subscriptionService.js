@@ -1,38 +1,31 @@
 import { apiGet, apiPost } from "./api";
 
-const RAZORPAY_SCRIPT = "https://checkout.razorpay.com/v1/checkout.js";
-
 // GET /api/Subscription/me -> status + plans + previous payments
 export const getMySubscription = () => apiGet("/Subscription/me");
 
-// POST /api/Subscription/order -> Razorpay order (amount backend decide karta hai)
-export const createOrder = (plan) =>
-  apiPost("/Subscription/order", { plan });
+// POST /api/Subscription/checkout -> PayU ko bhejne wala data (amount backend tay karta hai)
+export const createCheckout = (plan) =>
+  apiPost("/Subscription/checkout", { plan });
 
-// POST /api/Subscription/verify -> payment signature verify + plan activate
-export const verifyPayment = ({ orderId, paymentId, signature }) =>
-  apiPost("/Subscription/verify", { orderId, paymentId, signature });
+// PayU Hosted Checkout: hidden form banakar PayU ke page par bhejo.
+// Payment ke baad PayU backend ko, aur backend user ko wapas frontend par bhejta hai.
+export function submitToPayU(checkout) {
+  const form = document.createElement("form");
 
-// Razorpay checkout.js ek hi baar load hoti hai
-export function loadRazorpay() {
-  if (window.Razorpay) return Promise.resolve(true);
+  form.method = "POST";
+  form.action = checkout.actionUrl;
+  form.style.display = "none";
 
-  return new Promise((resolve) => {
-    const existing = document.querySelector(
-      `script[src="${RAZORPAY_SCRIPT}"]`
-    );
+  Object.entries(checkout.fields || {}).forEach(([name, value]) => {
+    const input = document.createElement("input");
 
-    if (existing) {
-      existing.addEventListener("load", () => resolve(true));
-      existing.addEventListener("error", () => resolve(false));
-      return;
-    }
+    input.type = "hidden";
+    input.name = name;
+    input.value = value ?? "";
 
-    const script = document.createElement("script");
-    script.src = RAZORPAY_SCRIPT;
-    script.async = true;
-    script.onload = () => resolve(true);
-    script.onerror = () => resolve(false);
-    document.body.appendChild(script);
+    form.appendChild(input);
   });
+
+  document.body.appendChild(form);
+  form.submit();
 }

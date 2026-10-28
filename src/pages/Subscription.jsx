@@ -14,9 +14,8 @@ import {
 
 import {
   getMySubscription,
-  createOrder,
-  verifyPayment,
-  loadRazorpay,
+  createCheckout,
+  submitToPayU,
 } from "../services/subscriptionService";
 
 import "./HelpSubscription.css";
@@ -129,8 +128,39 @@ function Subscription({ onNavigate }) {
   }, []);
 
   useEffect(() => {
+    // PayU se wapas aane par URL me ?payment=success|failed|error&txn=... hota hai
+    const params = new URLSearchParams(window.location.search);
+    const result = params.get("payment");
+
+    if (result) {
+      if (result === "success") {
+        setMessage("Payment successful! Your plan is now active.");
+        window.dispatchEvent(new Event("subscription-updated"));
+      } else if (result === "failed") {
+        setError("Payment failed or was cancelled. Please try again.");
+      } else {
+        setError(
+          "We could not confirm your payment. If money was deducted, it will be confirmed automatically in a few minutes."
+        );
+      }
+
+      // URL saaf karo taaki refresh par message dobara na aaye
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+
     loadSubscription();
   }, [loadSubscription]);
+
+  // PayU page se browser Back dabane par button atka na rahe
+  useEffect(() => {
+    function handlePageShow(event) {
+      if (event.persisted) setPayingKey("");
+    }
+
+    window.addEventListener("pageshow", handlePageShow);
+
+    return () => window.removeEventListener("pageshow", handlePageShow);
+  }, []);
 
   // ---- Backend se aayi prices ----
   const prices = { ...DEFAULT_PRICES };
@@ -174,7 +204,7 @@ function Subscription({ onNavigate }) {
   }
 
   function buttonLabel(plan, isCurrent) {
-    if (payingKey === plan.key) return "Processing...";
+    if (payingKey === plan.key) return "Redirecting to PayU...";
     if (isCurrent) return "Current Plan";
 
     if (plan.key === "basic") {
@@ -189,7 +219,7 @@ function Subscription({ onNavigate }) {
     return plan.button;
   }
 
-  // ---- Razorpay payment ----
+  // ---- PayU payment ----
   async function handleChoose(plan) {
     setMessage("");
     setError("");
@@ -209,75 +239,11 @@ function Subscription({ onNavigate }) {
     setPayingKey(plan.key);
 
     try {
-      const scriptLoaded = await loadRazorpay();
+      // Backend amount aur hash banata hai
+      const checkout = await createCheckout(plan.key);
 
-      if (!scriptLoaded || !window.Razorpay) {
-        throw new Error(
-          "Could not load the payment window. Check your internet and try again."
-        );
-      }
-
-      // Backend order banata hai (amount wahi tay karta hai)
-      const order = await createOrder(plan.key);
-
-      const options = {
-        key: order.keyId,
-        amount: order.amount,
-        currency: order.currency,
-        name: "Examo",
-        description: order.planName,
-        order_id: order.orderId,
-
-        prefill: {
-          name: order.name || "",
-          email: order.email || "",
-          contact: order.contact || "",
-        },
-
-        theme: { color: "#2563eb" },
-
-        handler: async (response) => {
-          try {
-            await verifyPayment({
-              orderId: response.razorpay_order_id,
-              paymentId: response.razorpay_payment_id,
-              signature: response.razorpay_signature,
-            });
-
-            setMessage(
-              `Payment successful! Your ${order.planName} is now active.`
-            );
-
-            await loadSubscription();
-
-            // App / Layout ko batao ki plan chalu ho gaya (unlock ke liye)
-            window.dispatchEvent(new Event("subscription-updated"));
-          } catch (err) {
-            setError(
-              err.message ||
-                "Payment verification failed. If money was deducted, it will be confirmed automatically in a few minutes."
-            );
-          } finally {
-            setPayingKey("");
-          }
-        },
-
-        modal: {
-          ondismiss: () => setPayingKey(""),
-        },
-      };
-
-      const checkout = new window.Razorpay(options);
-
-      checkout.on("payment.failed", (response) => {
-        setError(
-          response?.error?.description ||
-            "Payment failed. Please try again."
-        );
-        setPayingKey("");
-      });
-
-      checkout.open();
+      // PayU ke secure payment page par bhejo
+      submitToPayU(checkout);
     } catch (err) {
       setError(err.message || "Could not start the payment.");
       setPayingKey("");
@@ -294,8 +260,8 @@ function Subscription({ onNavigate }) {
       `Amount     : ${payment.currency || "INR"} ${formatAmount(
         payment.amount
       )}`,
-      `Payment ID : ${payment.razorpayPaymentId || "-"}`,
-      `Order ID   : ${payment.razorpayOrderId || "-"}`,
+      `Payment ID : ${payment.paymentId || "-"}`,
+      `Txn ID     : ${payment.txnId || "-"}`,
       "Status     : Paid",
     ].join("\n");
 
@@ -313,7 +279,7 @@ function Subscription({ onNavigate }) {
   function handleManagePayments() {
     setError("");
     setMessage(
-      "Payments are processed securely by Razorpay. You can pay with UPI, card or net banking when you choose a plan."
+      "Payments are processed securely by PayU. You can pay with card, UPI or net banking when you choose a plan."
     );
   }
 

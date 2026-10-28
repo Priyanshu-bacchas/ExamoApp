@@ -33,7 +33,12 @@ import {
 function App() {
   const [loggedIn, setLoggedIn] = useState(isAuthenticated());
   const [user, setUser] = useState(getUser());
-  const [activePage, setActivePage] = useState("dashboard");
+  // PayU payment ke baad URL me ?payment=... hota hai -> seedha Subscription page kholo
+  const [activePage, setActivePage] = useState(() =>
+    new URLSearchParams(window.location.search).has("payment")
+      ? "subscription"
+      : "dashboard"
+  );
 
   function handleAuthSuccess() {
     setUser(getUser());
