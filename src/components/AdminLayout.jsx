@@ -38,6 +38,11 @@ const menuItems = [
     icon: CreditCard,
   },
   {
+    key: "jobs",
+    label: "Content Manager",
+    icon: Briefcase,
+  },
+  {
     key: "logs",
     label: "Logs & Security",
     icon: ShieldCheck,
@@ -46,11 +51,6 @@ const menuItems = [
     key: "analytics",
     label: "Analytics",
     icon: TrendingUp,
-  },
-  {
-    key: "jobs",
-    label: "Content Manager",
-    icon: Briefcase,
   },
   {
     key: "help",

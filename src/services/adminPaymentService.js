@@ -10,6 +10,8 @@ import { apiGet, apiPost, apiPut } from "./api";
 //   POST /Admin/payments/subscriptions/{userId}/renew  { planKey, days, note }
 //   GET  /Admin/payments/plans                         -> [{ key, name, amount, days }]
 //   PUT  /Admin/payments/plans/{key}                   { amount }   (rupees)
+//   GET  /Admin/payments/trial                         -> { days }
+//   PUT  /Admin/payments/trial                         { days }   (0 = free trial band)
 //
 // startsAt / endsAt "yyyy-MM-dd" ke form me bheji jaati hain.
 // =====================================================
@@ -42,3 +44,9 @@ export const updateUserSubscription = (userId, data) =>
 // data = { planKey, days, note }
 export const renewUserSubscription = (userId, data) =>
   apiPost(`/Admin/payments/subscriptions/${userId}/renew`, data);
+
+// Free trial ke din
+export const getAdminTrial = () => apiGet("/Admin/payments/trial");
+
+export const updateAdminTrial = (days) =>
+  apiPut("/Admin/payments/trial", { days });

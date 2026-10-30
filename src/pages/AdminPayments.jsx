@@ -14,6 +14,8 @@ import {
   getAdminSubscriptions,
   getAdminPlans,
   updateAdminPlanPrice,
+  getAdminTrial,
+  updateAdminTrial,
   updateUserSubscription,
   renewUserSubscription,
 } from "../services/adminPaymentService";
@@ -43,6 +45,11 @@ function AdminPayments() {
   const [stats, setStats] = useState(EMPTY_STATS);
   const [plans, setPlans] = useState([]);
   const [priceDrafts, setPriceDrafts] = useState({});
+
+  // Free trial ke din (admin yahin se badalta hai)
+  const [trialDays, setTrialDays] = useState(2);
+  const [trialDraft, setTrialDraft] = useState("2");
+  const [savingTrial, setSavingTrial] = useState(false);
 
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
@@ -91,14 +98,20 @@ function AdminPayments() {
       setLoading(true);
       setError("");
 
-      const [subs, planList] = await Promise.all([
+      const [subs, planList, trial] = await Promise.all([
         getAdminSubscriptions({
           status,
           plan: planFilter,
           search: searchValue.trim(),
         }),
         getAdminPlans(),
+        getAdminTrial().catch(() => null),
       ]);
+
+      if (trial && Number.isFinite(Number(trial.days))) {
+        setTrialDays(Number(trial.days));
+        setTrialDraft(String(trial.days));
+      }
 
       const list = Array.isArray(planList) ? planList : [];
 
@@ -285,6 +298,34 @@ function AdminPayments() {
       setError(err.message || "Unable to update the price.");
     } finally {
       setSavingPlan("");
+    }
+  }
+
+  async function saveTrial() {
+    const days = Number(trialDraft);
+
+    if (!Number.isInteger(days) || days < 0 || days > 90) {
+      setError("Trial must be a whole number between 0 and 90 days.");
+      return;
+    }
+
+    try {
+      setSavingTrial(true);
+      setError("");
+
+      await updateAdminTrial(days);
+
+      setNotice(
+        days === 0
+          ? "Free trial turned off for new users."
+          : `Free trial set to ${days} day${days === 1 ? "" : "s"}. It applies to users whose trial has not started yet.`
+      );
+
+      await loadAll();
+    } catch (err) {
+      setError(err.message || "Unable to update the free trial.");
+    } finally {
+      setSavingTrial(false);
     }
   }
 
@@ -632,13 +673,64 @@ function AdminPayments() {
                   </div>
                 );
               })}
+
+              {/* Free trial */}
+              <div className="apay-plan">
+                <div className="apay-plan-head">
+                  <h3>Free Trial</h3>
+
+                  <span className="adm-pill adm-pill-green">Trial</span>
+                </div>
+
+                <div className="apay-plan-meta">
+                  Current length:{" "}
+                  <strong>
+                    {trialDays === 0
+                      ? "Off"
+                      : `${trialDays} day${trialDays === 1 ? "" : "s"}`}
+                  </strong>
+                </div>
+
+                <div className="adm-field" style={{ minWidth: 0 }}>
+                  <label htmlFor="trial-days">New length (days)</label>
+
+                  <div className="apay-price-box">
+                    <span>#</span>
+
+                    <input
+                      id="trial-days"
+                      type="number"
+                      min="0"
+                      max="90"
+                      step="1"
+                      value={trialDraft}
+                      disabled={savingTrial}
+                      onChange={(e) => setTrialDraft(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  className="primary-button"
+                  disabled={
+                    savingTrial || Number(trialDraft) === Number(trialDays)
+                  }
+                  onClick={saveTrial}
+                >
+                  <CircleCheck size={15} />
+                  {savingTrial ? "Saving..." : "Save trial"}
+                </button>
+              </div>
             </div>
           )}
 
           <p className="apay-note">
             The new price is used for payments made after you save it. Plans
             that users have already paid for are not changed. The minimum
-            price is ₹1.
+            price is ₹1. The trial length applies to users whose trial has not
+            started yet (users already in a trial keep their dates). Set it to
+            0 to turn the free trial off.
           </p>
         </>
       )}

@@ -191,7 +191,9 @@ function Subscription({ onNavigate }) {
         big:
           status === "Trial" && sub?.daysLeft > 0
             ? `${sub.daysLeft} day${sub.daysLeft === 1 ? "" : "s"} left`
-            : "2 days free trial",
+            : `${sub?.trialDays ?? 2} day${
+                (sub?.trialDays ?? 2) === 1 ? "" : "s"
+              } free trial`,
         small: pricesReady
           ? `Thereafter ₹${formatAmount(prices.monthly)}/month`
           : "Thereafter ...",
