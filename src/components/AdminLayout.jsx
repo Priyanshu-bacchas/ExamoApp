@@ -6,6 +6,7 @@ import {
   TrendingUp,
   MessageSquare,
   Briefcase,
+  CreditCard,
   Menu,
   X,
   LogOut,
@@ -30,6 +31,11 @@ const menuItems = [
     key: "users",
     label: "User Management",
     icon: Users,
+  },
+  {
+    key: "payments",
+    label: "Payments",
+    icon: CreditCard,
   },
   {
     key: "logs",
@@ -183,6 +189,7 @@ function getPageName(page) {
   const names = {
     dashboard: "Dashboard Insights",
     users: "User Management",
+    payments: "Payments",
     logs: "Logs & Security",
     analytics: "Analytics",
     jobs: "Content Manager",

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Component, Suspense, lazy, useState } from "react";
 
 import Layout from "./components/Layout";
 import AdminLayout from "./components/AdminLayout";
@@ -21,6 +21,9 @@ import AdminLogs from "./pages/AdminLogs";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import AdminHelp from "./pages/AdminHelp";
 import AdminJobs from "./pages/AdminJobs";
+
+// Payments page alag se load hota hai: isme koi dikkat ho to baaki app band nahi hoga
+const AdminPayments = lazy(() => import("./pages/AdminPayments"));
 import Jobs from "./pages/Jobs";
 
 import {
@@ -29,6 +32,55 @@ import {
   isAuthenticated,
   logout,
 } from "./services/authService";
+
+// Kisi page me error aaye to poori screen blank hone ki jagah error dikhao
+class PageErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { error };
+  }
+
+  componentDidCatch(error) {
+    console.error("Page crashed:", error);
+  }
+
+  render() {
+    if (!this.state.error) return this.props.children;
+
+    return (
+      <div
+        style={{
+          margin: "24px auto",
+          maxWidth: 640,
+          padding: 20,
+          border: "1px solid #fecaca",
+          background: "#fef2f2",
+          color: "#991b1b",
+          borderRadius: 12,
+          fontSize: 14,
+        }}
+      >
+        <strong>Something went wrong on this page.</strong>
+
+        <div style={{ marginTop: 8, wordBreak: "break-word" }}>
+          {String(this.state.error?.message || this.state.error)}
+        </div>
+
+        <button
+          type="button"
+          style={{ marginTop: 14 }}
+          onClick={() => window.location.reload()}
+        >
+          Reload
+        </button>
+      </div>
+    );
+  }
+}
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(isAuthenticated());
@@ -69,6 +121,7 @@ function App() {
     const adminPage = [
       "dashboard",
       "users",
+      "payments",
       "logs",
       "analytics",
       "jobs",
@@ -81,6 +134,19 @@ function App() {
       switch (adminPage) {
         case "users":
           return <Students />;
+
+        case "payments":
+          return (
+            <Suspense
+              fallback={
+                <div style={{ padding: 30, color: "#64748b" }}>
+                  Loading...
+                </div>
+              }
+            >
+              <AdminPayments />
+            </Suspense>
+          );
 
         case "logs":
           return <AdminLogs />;
@@ -112,7 +178,9 @@ function App() {
         user={user}
         onLogout={handleLogout}
       >
-        {renderAdminPage()}
+        <PageErrorBoundary key={adminPage}>
+          {renderAdminPage()}
+        </PageErrorBoundary>
       </AdminLayout>
     );
   }
@@ -169,6 +237,7 @@ function App() {
   const studentPage =
     activePage === "students" ||
     activePage === "users" ||
+    activePage === "payments" ||
     activePage === "logs" ||
     activePage === "analytics"
       ? "dashboard"
@@ -181,7 +250,9 @@ function App() {
       user={user}
       onLogout={handleLogout}
     >
-      {renderPage()}
+      <PageErrorBoundary key={studentPage}>
+        {renderPage()}
+      </PageErrorBoundary>
     </Layout>
   );
 }
