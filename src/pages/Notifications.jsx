@@ -8,6 +8,7 @@ import {
   Trophy,
   CircleCheck,
   Trash2,
+  CreditCard,
 } from "lucide-react";
 
 import {
@@ -83,6 +84,25 @@ const TYPE_META = {
     tone: "green",
     label: "Result",
     page: "results",
+  },
+  // Subscription: plan chalu / khatam hone wala hai / khatam ho gaya
+  "sub-start": {
+    icon: CreditCard,
+    tone: "green",
+    label: "Subscription",
+    page: "subscription",
+  },
+  "sub-eve": {
+    icon: CreditCard,
+    tone: "amber",
+    label: "Subscription",
+    page: "subscription",
+  },
+  "sub-end": {
+    icon: CreditCard,
+    tone: "red",
+    label: "Subscription",
+    page: "subscription",
   },
 };
 
