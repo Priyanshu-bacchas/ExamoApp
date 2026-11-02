@@ -12,6 +12,7 @@ import {
 
 import { getHelpContent, searchHelp } from "../services/helpService";
 import ContactForm from "../components/ContactForm";
+import HelpChatbot from "../components/HelpChatbot";
 
 import "./HelpSubscription.css";
 
@@ -28,8 +29,8 @@ const fallbackFeatured = [
     title: "Student Basics",
     tone: "mint",
     links: [
-      "How to set up my student profile?",
-      "How to add subjects and schedules?",
+      "How to use this website?",
+      "What does the Dashboard show?",
       "How to upload my documents?",
     ],
   },
@@ -37,8 +38,8 @@ const fallbackFeatured = [
     title: "Exam Enrollment",
     tone: "lavender",
     links: [
-      "How do I fill an exam form?",
-      "Where can I track my exam dates?",
+      "How do I add an exam form?",
+      "How do I change my exam form status?",
       "How to check my results?",
     ],
   },
@@ -56,33 +57,33 @@ const fallbackFeatured = [
 const fallbackFaqs = [
   {
     id: 1,
+    question: "How to use this website?",
+    answer:
+      "Sign up and log in, open Jobs and click 'Add to ExamForm' on the exam you want. It is added to Exam Forms, Exams, Preparation and Results automatically. Then open Exam Forms, fill the form on the official website and change its status from Pending to Filled.",
+  },
+  {
+    id: 2,
+    question: "How do I add an exam form?",
+    answer:
+      "Exam forms are added from the Jobs page. Open Jobs > Latest Jobs and click 'Add to ExamForm' next to the exam.",
+  },
+  {
+    id: 3,
+    question: "How do I change my exam form status?",
+    answer:
+      "Go to Student > Exam Forms, fill the form using the Open link, then click Edit and change the status from Pending to Filled.",
+  },
+  {
+    id: 4,
     question: "How to reset my password?",
     answer:
       "On the login page click 'Forgot Password?', enter your registered email and we will send a 6-digit code. Enter the code, choose a new password and log in with it.",
   },
   {
-    id: 2,
+    id: 5,
     question: "What payment methods are accepted?",
     answer:
       "We accept UPI, debit cards, credit cards and net banking for all paid plans.",
-  },
-  {
-    id: 3,
-    question: "How can I change or cancel my plan?",
-    answer:
-      "Open the Subscription page from the sidebar. You can switch between the Monthly and Yearly plans, or go back to the Basic plan anytime.",
-  },
-  {
-    id: 4,
-    question: "Is my data and uploaded documents safe?",
-    answer:
-      "Yes. Your exams, subjects, schedules and documents are visible only to your account.",
-  },
-  {
-    id: 5,
-    question: "How do I download my payment receipt?",
-    answer:
-      "Go to Subscription > Previous Payments and click the Download button next to the payment.",
   },
 ];
 
@@ -95,6 +96,7 @@ function Help({ onNavigate }) {
   const [searchMessage, setSearchMessage] = useState("");
   const [searching, setSearching] = useState(false);
   const [openIndex, setOpenIndex] = useState(0);
+  const [chatOpen, setChatOpen] = useState(false);
 
 
   // Featured cards + FAQ backend se
@@ -291,11 +293,15 @@ function Help({ onNavigate }) {
             <span>examoaspirant@gmail.com</span>
           </div>
 
-          <div>
+          <button
+            type="button"
+            className="hs-chat-open"
+            onClick={() => setChatOpen(true)}
+          >
             <MessageCircle size={16} />
-            <strong>Live Chat</strong>
-            <span>Available 9 AM - 6 PM</span>
-          </div>
+            <strong>Chat with Examo Assistant</strong>
+            <span>Instant answers, available 24/7</span>
+          </button>
         </div>
 
         {onNavigate && (
@@ -308,6 +314,17 @@ function Help({ onNavigate }) {
           </button>
         )}
       </aside>
+
+      <HelpChatbot
+        open={chatOpen}
+        onClose={() => setChatOpen(false)}
+        faqs={faqs}
+        onContact={() =>
+          document
+            .querySelector(".hs-side")
+            ?.scrollIntoView({ behavior: "smooth", block: "start" })
+        }
+      />
     </div>
   );
 }
