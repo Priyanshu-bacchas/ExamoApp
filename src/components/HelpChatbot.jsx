@@ -15,34 +15,112 @@ const QUICK_QUESTIONS = [
   "I can't log in to my account",
 ];
 
-// Seedhe jawab wale intent (backend search se pehle)
+// Text ko saaf karo: lowercase, emoji/punctuation hatao, extra space hatao
+function normalize(text) {
+  return String(text)
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function wordCount(norm) {
+  return norm ? norm.split(" ").length : 0;
+}
+
+// Greeting: hi, hii, hello, hey, namaste, good morning ... (pura message greeting ho)
+const GREETING_RE =
+  /^(h+i+|h+y+|h+e+y+|h+e+l+o+|h+l+o+|h+e+l+l+o+|hola|namaste|namaskar|pranam|good (morning|afternoon|evening)|gm)(\s+(there|bot|assistant|examo|sir|madam|mam|bro|bhai|everyone|all|dost))*$/;
+
+// Short ack words: ok, okay, thik hai, got it, cool ...
+const ACK_WORD_RE = /^(o+k+|o+k+a+y+|o+k+k+|k+|hm+|h+m+|o+h+|ohh+)$/;
+const ACK_WORDS = new Set([
+  "thik",
+  "theek",
+  "hai",
+  "h",
+  "acha",
+  "accha",
+  "achha",
+  "got",
+  "it",
+  "gotcha",
+  "cool",
+  "nice",
+  "great",
+  "fine",
+  "alright",
+  "sure",
+  "done",
+  "good",
+  "perfect",
+  "awesome",
+  "yes",
+  "yeah",
+  "yep",
+  "haan",
+  "ha",
+  "hmm",
+  "samajh",
+  "gaya",
+  "gayi",
+  "aa",
+  "ho",
+]);
+
+function isAck(norm) {
+  const words = norm.split(" ").filter(Boolean);
+
+  if (!words.length || words.length > 4) return false;
+
+  return words.every((w) => ACK_WORD_RE.test(w) || ACK_WORDS.has(w));
+}
+
+const THANKS_RE =
+  /\b(t+h+a+n+k+s*|thank ?you|thank ?u|thanku|thx|tnx|tysm|ty|shukriya|shukria|dhanyavad|dhanyawad|dhanyvaad)\b/;
+
+const GREETING_REPLY =
+  "Hi! I'm the Examo Assistant. Ask me anything about using Examo, like adding exams from Jobs, exam form status, results, plans or login help.";
+
+const THANKS_REPLY = "Thank you! Ask me if you need anything else.";
+
+// Seedhe jawab wale intent (backend search se pehle).
+// test(norm) me norm = saaf kiya hua lowercase text
 const INTENTS = [
   {
-    test: /^\s*(h+i+|h+y+|h+e+y+|h+e+l+o+|h+l+o+|hola|namaste|namaskar|good (morning|afternoon|evening))\b/i,
-    reply:
-      "Hi! I'm the Examo Assistant. Ask me anything about using Examo, like adding exams from Jobs, exam form status, results, plans or login help.",
+    test: (norm) => GREETING_RE.test(norm),
+    reply: GREETING_REPLY,
     chips: true,
   },
   {
-    test: /\b(thanks|thank you|thx|shukriya|dhanyavad|dhanyawad)\b/i,
-    reply: "You're welcome! Ask me if you need anything else.",
-  },
-  {
-    test: /^(bye|goodbye|ok bye|see you|tata)\b/i,
+    test: (norm) =>
+      wordCount(norm) <= 4 &&
+      /\b(bye|goodbye|see you|tata|good night)\b/.test(norm),
     reply: "Goodbye! All the best for your exam preparation.",
   },
   {
-    test: /\b(who are you|your name|what are you|tum kaun|aap kaun)\b/i,
+    // thanks / thank you / ok / okay / thik hai ... sabka ek jaisa jawab
+    test: (norm) =>
+      isAck(norm) || (wordCount(norm) <= 4 && THANKS_RE.test(norm)),
+    reply: THANKS_REPLY,
+  },
+  {
+    test: (norm) =>
+      /\b(who are you|your name|what are you|tum kaun|aap kaun)\b/.test(norm),
     reply:
       "I'm the Examo Assistant, a small help bot. I answer questions about this website using the Examo help articles.",
   },
   {
-    test: /^(help|menu|options|topics)$/i,
+    test: (norm) => /^(help|menu|options|topics)$/.test(norm),
     reply: "Here are some things you can ask me:",
+    chips: true,
   },
   {
     // "how to use / kaise use kare / guide / tutorial"
-    test: /\b(how (to|do i|can i) use|how (does|do) (it|this|examo|the (website|app)) work|kaise (use|kaam|chalaye)|guide|tutorial)\b/i,
+    test: (norm) =>
+      /\b(how (to|do i|can i) use|how (does|do) (it|this|examo|the (website|app)) work|kaise (use|kaam|chalaye)|guide|tutorial)\b/.test(
+        norm
+      ),
     ask: "How to use this website?",
   },
 ];
@@ -156,17 +234,15 @@ function HelpChatbot({ open, onClose, faqs = [], onContact }) {
     let reply;
 
     try {
-      const intent = INTENTS.find((item) => item.test.test(text));
+      const norm = normalize(text);
+      const intent = INTENTS.find((item) => item.test(norm));
 
       let query = text;
 
       if (intent && intent.reply) {
         reply = {
           text: intent.reply,
-          chips:
-            intent.chips || /^(help|menu|options|topics)$/i.test(text)
-              ? QUICK_QUESTIONS
-              : undefined,
+          chips: intent.chips ? QUICK_QUESTIONS : undefined,
         };
       } else {
         if (intent && intent.ask) query = intent.ask;
