@@ -21,6 +21,7 @@ import AdminLogs from "./pages/AdminLogs";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import AdminHelp from "./pages/AdminHelp";
 import AdminJobs from "./pages/AdminJobs";
+import AdminNotifyMe from "./pages/AdminNotifyMe";
 
 // Payments page alag se load hota hai: isme koi dikkat ho to baaki app band nahi hoga
 const AdminPayments = lazy(() => import("./pages/AdminPayments"));
@@ -125,6 +126,7 @@ function App() {
       "logs",
       "analytics",
       "jobs",
+      "notifyme",
       "help",
     ].includes(activePage)
       ? activePage
@@ -156,6 +158,9 @@ function App() {
 
         case "jobs":
           return <AdminJobs />;
+
+        case "notifyme":
+          return <AdminNotifyMe onNavigate={setActivePage} />;
 
         case "help":
           return <AdminHelp />;
@@ -239,6 +244,7 @@ function App() {
     activePage === "users" ||
     activePage === "payments" ||
     activePage === "logs" ||
+    activePage === "notifyme" ||
     activePage === "analytics"
       ? "dashboard"
       : activePage;

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   LayoutDashboard,
   Users,
@@ -6,6 +6,7 @@ import {
   TrendingUp,
   MessageSquare,
   Briefcase,
+  Bell,
   CreditCard,
   Menu,
   X,
@@ -13,6 +14,12 @@ import {
 } from "lucide-react";
 
 import "../admin.css";
+import "./AdminNavBadge.css";
+
+import {
+  getAdminUnreadCount,
+  NOTIFY_CHANGED_EVENT,
+} from "../services/adminNotifyService";
 
 import {
   getDisplayName,
@@ -43,6 +50,11 @@ const menuItems = [
     icon: Briefcase,
   },
   {
+    key: "notifyme",
+    label: "NotifyMe",
+    icon: Bell,
+  },
+  {
     key: "logs",
     label: "Logs & Security",
     icon: ShieldCheck,
@@ -67,6 +79,38 @@ function AdminLayout({
   children,
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [unread, setUnread] = useState(0);
+
+  // NotifyMe ka unread count: page badalne par, har 30 second me,
+  // aur NotifyMe page me kuch badalne par refresh hota hai
+  useEffect(() => {
+    if (!isAdmin(user)) return undefined;
+
+    let cancelled = false;
+
+    async function loadUnread() {
+      try {
+        const data = await getAdminUnreadCount();
+
+        if (!cancelled) setUnread(Number(data?.unreadCount) || 0);
+      } catch {
+        // Badge fail hone se kuch nahi bigadta
+      }
+    }
+
+    loadUnread();
+
+    const timer = setInterval(loadUnread, 30000);
+
+    window.addEventListener(NOTIFY_CHANGED_EVENT, loadUnread);
+
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+      window.removeEventListener(NOTIFY_CHANGED_EVENT, loadUnread);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activePage]);
 
   const displayName = getDisplayName(user);
   const roleLabel = getRoleLabel(user);
@@ -122,6 +166,12 @@ function AdminLayout({
                 <Icon size={19} />
 
                 <span>{item.label}</span>
+
+                {item.key === "notifyme" && unread > 0 && (
+                  <span className="adm-nav-badge">
+                    {unread > 99 ? "99+" : unread}
+                  </span>
+                )}
               </button>
             );
           })}
@@ -190,6 +240,7 @@ function getPageName(page) {
     dashboard: "Dashboard Insights",
     users: "User Management",
     payments: "Payments",
+    notifyme: "NotifyMe",
     logs: "Logs & Security",
     analytics: "Analytics",
     jobs: "Content Manager",
