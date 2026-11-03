@@ -20,6 +20,10 @@ export const getSupportMessages = ({ status = "", search = "" } = {}) => {
 export const updateSupportMessageStatus = (id, status) =>
   apiPut(`/Help/messages/${id}/status`, { status });
 
+// Admin ne message khola -> "New" badge hat jata hai
+export const markSupportMessageSeen = (id) =>
+  apiPut(`/Help/messages/${id}/seen`, {});
+
 export const deleteSupportMessage = (id) =>
   apiDelete(`/Help/messages/${id}`);
 
