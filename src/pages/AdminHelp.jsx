@@ -14,9 +14,37 @@ import {
   updateSupportMessageStatus,
   deleteSupportMessage,
   replyToSupportMessage,
+  markSupportMessageSeen,
 } from "../services/supportService";
 
+import { emitNotifyChanged } from "../services/adminNotifyService";
+
 import "./AdminHelp.css";
+
+// "New" badge ki styling (isi file me, alag CSS file ki zaroorat nahi)
+const NEW_BADGE_CSS = `
+.adm-help-newbadge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
+.adm-help-row.is-new td {
+  background: #f3f7ff;
+}
+
+.adm-help-row.is-new td:first-child {
+  box-shadow: inset 3px 0 0 #2563eb;
+}
+`;
 
 const emptyStats = {
   total: 0,
@@ -97,6 +125,26 @@ function AdminHelp() {
     }
   }
 
+  // Row kholte hi "New" hat jata hai (backend me bhi seen save hota hai)
+  async function toggleRow(item, isOpen) {
+    setExpandedId(isOpen ? null : item.id);
+
+    if (isOpen || !item.isNew) return;
+
+    setItems((prev) =>
+      prev.map((x) => (x.id === item.id ? { ...x, isNew: false } : x))
+    );
+
+    try {
+      await markSupportMessageSeen(item.id);
+
+      // Sidebar ke NotifyMe badge ko refresh karo
+      emitNotifyChanged();
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   function openReply(item) {
     setReplyId(replyId === item.id ? null : item.id);
     setReplyText("");
@@ -155,6 +203,8 @@ function AdminHelp() {
 
   return (
     <div>
+      <style>{NEW_BADGE_CSS}</style>
+
       <div className="adm-heading">
         <div>
           <h1>Help & Support</h1>
@@ -277,15 +327,19 @@ function AdminHelp() {
                   return [
                     <tr
                       key={item.id}
-                      className="adm-help-row"
-                      onClick={() =>
-                        setExpandedId(open ? null : item.id)
-                      }
+                      className={`adm-help-row ${
+                        item.isNew ? "is-new" : ""
+                      }`}
+                      onClick={() => toggleRow(item, open)}
                     >
                       <td>{formatDateTime(item.createdAt)}</td>
 
                       <td>
                         <strong>{item.name}</strong>
+
+                        {item.isNew && (
+                          <span className="adm-help-newbadge">New</span>
+                        )}
 
                         <div className="adm-sub">{item.email}</div>
                       </td>
