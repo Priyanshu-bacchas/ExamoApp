@@ -369,7 +369,7 @@ function AdminBackup() {
 
       <div className="adm-heading">
         <div>
-          <h1>Backup</h1>
+          <h1>Backup &amp; Restore</h1>
           <p>
             Data deleted from Content Manager, NotifyMe and Help &amp;
             Support is saved here. You can restore it anytime.

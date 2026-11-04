@@ -38,6 +38,49 @@ const STATUS_PILL = {
   Expired: "adm-pill-red",
 };
 
+// Edit / Renew buttons ke rang (isi file me, alag CSS file ki zaroorat nahi)
+const ACTION_BTN_CSS = `
+.apay-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 9px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(16, 24, 40, 0.14);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.apay-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+  box-shadow: 0 6px 14px rgba(16, 24, 40, 0.2);
+}
+
+.apay-btn:active {
+  transform: translateY(0);
+}
+
+.apay-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.apay-btn-edit {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.apay-btn-renew {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+}
+`;
+
 function AdminPayments() {
   const [tab, setTab] = useState("subscriptions");
 
@@ -359,6 +402,8 @@ function AdminPayments() {
 
   return (
     <div>
+      <style>{ACTION_BTN_CSS}</style>
+
       <div className="adm-heading">
         <div>
           <h1>Payments</h1>
@@ -553,7 +598,7 @@ function AdminPayments() {
                             <div className="apay-actions">
                               <button
                                 type="button"
-                                className="adm-btn"
+                                className="apay-btn apay-btn-edit"
                                 onClick={() => openEdit(item)}
                               >
                                 <Pencil size={14} />
@@ -562,7 +607,7 @@ function AdminPayments() {
 
                               <button
                                 type="button"
-                                className="adm-btn"
+                                className="apay-btn apay-btn-renew"
                                 onClick={() => openRenew(item)}
                               >
                                 <RefreshCw size={14} />
@@ -615,6 +660,55 @@ function AdminPayments() {
             </div>
           ) : (
             <div className="apay-plans">
+              {/* Free trial */}
+              <div className="apay-plan">
+                <div className="apay-plan-head">
+                  <h3>Free Trial</h3>
+
+                  <span className="adm-pill adm-pill-green">Trial</span>
+                </div>
+
+                <div className="apay-plan-meta">
+                  Current length:{" "}
+                  <strong>
+                    {trialDays === 0
+                      ? "Off"
+                      : `${trialDays} day${trialDays === 1 ? "" : "s"}`}
+                  </strong>
+                </div>
+
+                <div className="adm-field" style={{ minWidth: 0 }}>
+                  <label htmlFor="trial-days">New length (days)</label>
+
+                  <div className="apay-price-box">
+                    <span>#</span>
+
+                    <input
+                      id="trial-days"
+                      type="number"
+                      min="0"
+                      max="90"
+                      step="1"
+                      value={trialDraft}
+                      disabled={savingTrial}
+                      onChange={(e) => setTrialDraft(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  className="primary-button"
+                  disabled={
+                    savingTrial || Number(trialDraft) === Number(trialDays)
+                  }
+                  onClick={saveTrial}
+                >
+                  <CircleCheck size={15} />
+                  {savingTrial ? "Saving..." : "Save trial"}
+                </button>
+              </div>
+
               {plans.map((plan) => {
                 const draft = priceDrafts[plan.key] ?? "";
                 const changed = Number(draft) !== Number(plan.amount);
@@ -673,55 +767,6 @@ function AdminPayments() {
                   </div>
                 );
               })}
-
-              {/* Free trial */}
-              <div className="apay-plan">
-                <div className="apay-plan-head">
-                  <h3>Free Trial</h3>
-
-                  <span className="adm-pill adm-pill-green">Trial</span>
-                </div>
-
-                <div className="apay-plan-meta">
-                  Current length:{" "}
-                  <strong>
-                    {trialDays === 0
-                      ? "Off"
-                      : `${trialDays} day${trialDays === 1 ? "" : "s"}`}
-                  </strong>
-                </div>
-
-                <div className="adm-field" style={{ minWidth: 0 }}>
-                  <label htmlFor="trial-days">New length (days)</label>
-
-                  <div className="apay-price-box">
-                    <span>#</span>
-
-                    <input
-                      id="trial-days"
-                      type="number"
-                      min="0"
-                      max="90"
-                      step="1"
-                      value={trialDraft}
-                      disabled={savingTrial}
-                      onChange={(e) => setTrialDraft(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  className="primary-button"
-                  disabled={
-                    savingTrial || Number(trialDraft) === Number(trialDays)
-                  }
-                  onClick={saveTrial}
-                >
-                  <CircleCheck size={15} />
-                  {savingTrial ? "Saving..." : "Save trial"}
-                </button>
-              </div>
             </div>
           )}
 

@@ -72,7 +72,7 @@ const menuItems = [
   },
   {
     key: "backup",
-    label: "Backup",
+    label: "Backup & Restore",
     icon: Archive,
   },
 ];
@@ -251,7 +251,7 @@ function getPageName(page) {
     analytics: "Analytics",
     jobs: "Content Manager",
     help: "Help & Support",
-    backup: "Backup",
+    backup: "Backup & Restore",
   };
 
   return names[page] || "Dashboard Insights";
