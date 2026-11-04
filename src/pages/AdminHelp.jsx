@@ -37,6 +37,12 @@ const NEW_BADGE_CSS = `
   vertical-align: middle;
 }
 
+.adm-help-action-col {
+  width: 110px;
+  text-align: right;
+  white-space: nowrap;
+}
+
 .adm-help-row.is-new td {
   background: #f3f7ff;
 }
@@ -183,7 +189,13 @@ function AdminHelp() {
   }
 
   async function handleDelete(item) {
-    if (!window.confirm("Delete this message permanently?")) return;
+    if (
+      !window.confirm(
+        "Delete this message? It will be saved in Backup, and you can restore it from there."
+      )
+    ) {
+      return;
+    }
 
     try {
       setBusyId(item.id);
@@ -315,6 +327,7 @@ function AdminHelp() {
                   <th>From</th>
                   <th>Subject</th>
                   <th>Status</th>
+                  <th className="adm-help-action-col">Action</th>
                 </tr>
               </thead>
 
@@ -373,6 +386,23 @@ function AdminHelp() {
                           </span>
                         )}
                       </td>
+
+                      <td
+                        className="adm-help-action-col"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <button
+                          type="button"
+                          className="adm-btn adm-btn-danger"
+                          disabled={busy}
+                          onClick={() => handleDelete(item)}
+                          title="Delete message"
+                          aria-label="Delete message"
+                        >
+                          <Trash2 size={15} />
+                          Delete
+                        </button>
+                      </td>
                     </tr>,
 
                     open && (
@@ -380,7 +410,7 @@ function AdminHelp() {
                         key={`${item.id}-detail`}
                         className="adm-help-detail"
                       >
-                        <td colSpan={4}>
+                        <td colSpan={5}>
                           <div className="adm-help-detail-box">
                             <div className="adm-help-detail-meta">
                               <span>

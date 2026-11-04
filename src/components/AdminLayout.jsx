@@ -7,6 +7,7 @@ import {
   MessageSquare,
   Briefcase,
   Bell,
+  Archive,
   CreditCard,
   Menu,
   X,
@@ -68,6 +69,11 @@ const menuItems = [
     key: "help",
     label: "Help & Support",
     icon: MessageSquare,
+  },
+  {
+    key: "backup",
+    label: "Backup",
+    icon: Archive,
   },
 ];
 
@@ -245,6 +251,7 @@ function getPageName(page) {
     analytics: "Analytics",
     jobs: "Content Manager",
     help: "Help & Support",
+    backup: "Backup",
   };
 
   return names[page] || "Dashboard Insights";
