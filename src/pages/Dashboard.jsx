@@ -175,6 +175,8 @@ function Dashboard({ onNavigate, user }) {
 
   return (
     <div className="page">
+      <style>{STAT_TONE_CSS}</style>
+
       {/* -------------------------------- */}
       {/* DASHBOARD HEADING */}
       {/* -------------------------------- */}
@@ -211,6 +213,7 @@ function Dashboard({ onNavigate, user }) {
           icon={
             <GraduationCap size={21} />
           }
+          tone="blue"
           title="Upcoming Exams"
           value={upcomingExams.length}
           text="Upcoming"
@@ -218,6 +221,7 @@ function Dashboard({ onNavigate, user }) {
 
         <StatCard
           icon={<BookOpen size={21} />}
+          tone="violet"
           title="Subjects"
           value={subjects.length}
           text={`${completedSubjects} completed`}
@@ -225,6 +229,7 @@ function Dashboard({ onNavigate, user }) {
 
         <StatCard
           icon={<Clock3 size={21} />}
+          tone="green"
           title="Study Sessions"
           value={schedules.length}
           text="Total sessions"
@@ -234,6 +239,7 @@ function Dashboard({ onNavigate, user }) {
           icon={
             <ClipboardList size={21} />
           }
+          tone="amber"
           title="Exam Forms"
           value={pendingForms.length}
           text="Pending forms"
@@ -513,14 +519,48 @@ function Dashboard({ onNavigate, user }) {
    STAT CARD
    ========================================= */
 
+// Card ke halke rang (isi file me, alag CSS file ki zaroorat nahi)
+const STAT_TONE_CSS = `
+.stat-card.stat-card-blue   { background: #eff6ff; border-color: #bfdbfe; }
+.stat-card.stat-card-violet { background: #f5f3ff; border-color: #ddd6fe; }
+.stat-card.stat-card-green  { background: #f0fdf4; border-color: #bbf7d0; }
+.stat-card.stat-card-amber  { background: #fffbeb; border-color: #fde68a; }
+
+.stat-card.stat-card-blue   .stat-icon { background: #dbeafe; color: #2563eb; }
+.stat-card.stat-card-violet .stat-icon { background: #ede9fe; color: #7c3aed; }
+.stat-card.stat-card-green  .stat-icon { background: #dcfce7; color: #16a34a; }
+.stat-card.stat-card-amber  .stat-icon { background: #fef3c7; color: #d97706; }
+
+/* Quick Actions box: halka rang bhara hua, andar ke buttons safed */
+.page .quick-actions-card {
+  background: linear-gradient(135deg, #eaf2ff 0%, #f3eeff 100%);
+  border: 1px solid #cddcff;
+}
+
+.page .quick-actions-card h2 {
+  color: #1e3a8a;
+}
+
+.page .quick-actions button {
+  background: #ffffff;
+  border-color: #cddcff;
+}
+
+.page .quick-actions button:hover {
+  background: #f5f8ff;
+  border-color: #93b4ff;
+}
+`;
+
 function StatCard({
   icon,
   title,
   value,
   text,
+  tone = "blue",
 }) {
   return (
-    <div className="stat-card">
+    <div className={`stat-card stat-card-${tone}`}>
       <div className="stat-icon">
         {icon}
       </div>
