@@ -213,6 +213,18 @@ const SECTION_ICON = {
   help: MessageSquare,
 };
 
+// Card ke halke rang (Content Manager jaise) - isi file me, alag CSS file ki zaroorat nahi
+const CARD_TONE_CSS = `
+.adm-shell .adm-stat.adm-card-blue   { background: #eff6ff; border-color: #bfdbfe; }
+.adm-shell .adm-stat.adm-card-violet { background: #f5f3ff; border-color: #ddd6fe; }
+.adm-shell .adm-stat.adm-card-pink   { background: #fdf2f8; border-color: #fbcfe8; }
+.adm-shell .adm-stat.adm-card-green  { background: #f0fdf4; border-color: #bbf7d0; }
+.adm-shell .adm-stat.adm-card-amber  { background: #fffbeb; border-color: #fde68a; }
+.adm-shell .adm-stat.adm-card-teal   { background: #f0fdfa; border-color: #99f6e4; }
+.adm-shell .adm-stat.adm-card-red    { background: #fef2f2; border-color: #fecaca; }
+.adm-shell .adm-stat.adm-card-slate  { background: #f8fafc; border-color: #e2e8f0; }
+`;
+
 function AdminBackup() {
   const [items, setItems] = useState([]);
   const [stats, setStats] = useState(emptyStats);
@@ -366,6 +378,7 @@ function AdminBackup() {
   return (
     <div>
       <style>{BACKUP_CSS}</style>
+      <style>{CARD_TONE_CSS}</style>
 
       <div className="adm-heading">
         <div>
@@ -599,7 +612,7 @@ function Row({ label, value }) {
 
 function StatCard({ tone, icon, title, value, text }) {
   return (
-    <div className="adm-stat">
+    <div className={`adm-stat adm-card-${tone}`}>
       <div className={`adm-stat-icon adm-tone-${tone}`}>{icon}</div>
 
       <div className="adm-stat-body">
