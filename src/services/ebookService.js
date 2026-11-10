@@ -3,6 +3,8 @@ import { apiGet, apiPut, apiDelete, authHeaders } from "./api";
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "https://localhost:7183/api";
 
+// access: "Free" | "Paid" (na do to dono)
+//   includeDrafts: sirf Admin ke liye (Draft ebooks bhi aati hain)
 export const getEbooks = ({ access, includeDrafts = false } = {}) => {
   const params = new URLSearchParams();
 
@@ -14,16 +16,23 @@ export const getEbooks = ({ access, includeDrafts = false } = {}) => {
   return apiGet(`/Ebooks${query ? `?${query}` : ""}`);
 };
 
+// File kholne ka temporary (10 min) link
 export const getEbookUrl = async (id) => {
   const data = await apiGet(`/Ebooks/${id}/url`);
+
   return data?.url || "";
 };
 
+// Download ka temporary (10 min) link
 export const getEbookDownloadUrl = async (id) => {
   const data = await apiGet(`/Ebooks/${id}/download-url`);
+
   return data?.url || "";
 };
 
+// ---------- Sirf Admin ----------
+
+// PDF upload (multipart): title, description, access, publishStatus, file
 export const uploadEbook = async ({
   title,
   description,
@@ -34,6 +43,7 @@ export const uploadEbook = async ({
   if (!file) throw new Error("Please select a PDF file.");
 
   const formData = new FormData();
+
   formData.append("title", title || "");
   formData.append("description", description || "");
   formData.append("access", access || "Free");
@@ -42,17 +52,18 @@ export const uploadEbook = async ({
 
   const response = await fetch(`${API_BASE_URL}/Ebooks`, {
     method: "POST",
-    headers: authHeaders(),
+    headers: authHeaders(), // Content-Type browser khud set karega
     body: formData,
   });
 
   const text = await response.text();
+
   let data = text;
 
   try {
     data = JSON.parse(text);
   } catch {
-    // Plain-text response
+    // plain text response
   }
 
   if (!response.ok) {
@@ -61,17 +72,21 @@ export const uploadEbook = async ({
       data?.Message ||
       data?.title ||
       "Upload failed.";
+
     throw new Error(message);
   }
 
   return data;
 };
 
+// Title / description / access / publishStatus badlo (file nahi badalti)
 export const updateEbook = (id, data) => apiPut(`/Ebooks/${id}`, data);
 
+// Free <-> Paid
 export const setEbookAccess = (id, access) =>
   apiPut(`/Ebooks/${id}/access`, { access });
 
+// Draft <-> Published
 export const setEbookPublished = (id, published) =>
   apiPut(`/Ebooks/${id}/publish`, { published });
 
