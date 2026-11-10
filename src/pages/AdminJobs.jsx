@@ -126,8 +126,8 @@ function AdminJobs() {
             <h1>Content Manager</h1>
             <p>Manage jobs, exams, results, admit cards and ebooks.</p>
           </div>
-          <ContentSummary />
         </div>
+        <ContentSummary />
 
         {tabs}
         <AdminEbooks key={refreshKey} />
@@ -229,8 +229,8 @@ function AdminJobs() {
           <h1>Content Manager</h1>
           <p>Manage jobs, exams, results, admit cards and ebooks.</p>
         </div>
+        </div>
         <ContentSummary />
-      </div>
 
       {tabs}
 
