@@ -15,7 +15,7 @@ import {
   Menu,
   LogOut,
   Lock,
-  Library,
+  Book,
 } from "lucide-react";
 
 import {
@@ -267,7 +267,7 @@ function Layout({
             onClick={() => setEbookOpen((open) => !open)}
             aria-expanded={ebookOpen}
           >
-            <Library size={18} />
+            <Book size={18} />
             <span>Ebooks</span>
             <ChevronDown
               size={16}
