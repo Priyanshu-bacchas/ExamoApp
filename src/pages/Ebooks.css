@@ -101,3 +101,96 @@
   color: #64748b;
   font-size: 12px;
 }
+
+
+/* Admin Content Manager > Ebook toolbar (match existing admin controls) */
+.admin-ebooks .crud-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.admin-ebooks .crud-toolbar-left,
+.admin-ebooks .crud-toolbar-right {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.admin-ebooks .search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 240px;
+  padding: 0 12px;
+  border: 1px solid #dbe2ee;
+  border-radius: 9px;
+  background: #fff;
+  color: #64748b;
+}
+
+.admin-ebooks .search-box input {
+  width: 100%;
+  min-width: 190px;
+  padding: 10px 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #0f172a;
+  font: inherit;
+}
+
+.admin-ebooks .crud-toolbar select {
+  min-height: 40px;
+  padding: 8px 34px 8px 12px;
+  border: 1px solid #dbe2ee;
+  border-radius: 9px;
+  background: #fff;
+  color: #334155;
+  font: inherit;
+}
+
+.admin-ebooks .data-card {
+  min-height: 270px;
+}
+
+.admin-ebooks .empty-state {
+  min-height: 270px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.admin-ebooks .empty-state .empty-icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  margin-bottom: 10px;
+  border-radius: 50%;
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+@media (max-width: 760px) {
+  .admin-ebooks .crud-toolbar,
+  .admin-ebooks .crud-toolbar-left,
+  .admin-ebooks .crud-toolbar-right {
+    width: 100%;
+  }
+
+  .admin-ebooks .search-box {
+    flex: 1 1 100%;
+  }
+
+  .admin-ebooks .crud-toolbar-right > button {
+    flex: 1;
+    justify-content: center;
+  }
+}
