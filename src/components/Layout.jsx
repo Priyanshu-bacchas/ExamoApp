@@ -16,8 +16,6 @@ import {
   LogOut,
   Lock,
   Library,
-  Gift,
-  Crown,
 } from "lucide-react";
 
 import {
@@ -47,7 +45,7 @@ function HelpIcon({ size = 18 }) {
       strokeLinejoin="round"
     >
       <circle cx="12" cy="12" r="10" />
-      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 5" />
+      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
       <path d="M12 17h.01" />
     </svg>
   );
@@ -64,153 +62,310 @@ const studentChildren = [
   { key: "documents", label: "Documents", icon: FileText },
 ];
 
-// Ebook dropdown ke andar wale pages
-const ebookChildren = [
-  { key: "ebookFree", label: "Free", icon: Gift },
-  { key: "ebookPaid", label: "Paid", icon: Crown },
-];
-
-const menuItems = [
+const overviewItems = [
   { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { key: "students", label: "Students", icon: GraduationCap },
-  { key: "studentGroup", label: "Student", icon: ClipboardList, children: studentChildren },
-  { key: "ebookGroup", label: "Ebooks", icon: Library, children: ebookChildren },
-  { key: "jobs", label: "Latest Jobs", icon: Briefcase },
-  { key: "notifications", label: "Notifications", icon: Bell },
-  { key: "subscription", label: "Subscription", icon: CreditCard },
-  { key: "help", label: "Help", icon: HelpIcon },
 ];
 
-function Layout({ activePage, onNavigate, user, onLogout, children }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [studentOpen, setStudentOpen] = useState(false);
-  const [ebookOpen, setEbookOpen] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
+const opportunityItems = [
+  { key: "jobs", label: "Jobs", icon: Briefcase },
+  { key: "notifications", label: "Notifications", icon: Bell },
+];
+
+const generalItems = [
+  { key: "help", label: "Help", icon: HelpIcon },
+  { key: "subscription", label: "Subscription", icon: CreditCard },
+];
+
+// Trial khatam hone par sirf ye pages khule rehte hain
+const FREE_PAGES = ["help", "subscription"];
+
+const pageNames = {
+  dashboard: "Dashboard",
+  examForms: "Exam Forms",
+  exams: "Exams",
+  preparations: "Preparation",
+  results: "Results",
+  subjects: "Subjects",
+  schedules: "Schedule",
+  documents: "Documents",
+  ebookFree: "Free Ebooks",
+  ebookPaid: "Paid Ebooks",
+  jobs: "Jobs",
+  notifications: "Notifications",
+  help: "Help",
+  subscription: "Subscription",
+};
+
+function Layout({
+  activePage,
+  onNavigate,
+  user,
+  onLogout,
+  locked = false,
+  children,
+}) {
+  const displayName = getDisplayName(user);
+  const roleLabel = getRoleLabel(user);
+
+  const initial = displayName
+    ? displayName.charAt(0).toUpperCase()
+    : "S";
+
+  const [studentOpen, setStudentOpen] = useState(true);
+  const [ebookOpen, setEbookOpen] = useState(
+    activePage === "ebookFree" || activePage === "ebookPaid"
+  );
+
+  // Unread notifications (topbar bell + sidebar badge)
+  const [unread, setUnread] = useState(0);
 
   const refreshUnread = useCallback(async () => {
-    try {
-      const count = await getUnreadCount();
-      setUnreadCount(Number(count) || 0);
-    } catch (error) {
-      console.error("Unable to load unread notifications:", error);
-    }
-  }, []);
+    // Locked me notifications API band hai
+    if (locked) return;
 
+    try {
+      const data = await getUnreadCount();
+      setUnread(Number(data?.unreadCount) || 0);
+    } catch {
+      // bell chhupi rehne do, page nahi tootna chahiye
+    }
+  }, [locked]);
+
+  // Page badalne par + har 1 minute me + notifications badalne par refresh
   useEffect(() => {
     refreshUnread();
-    window.addEventListener(NOTIFICATIONS_CHANGED, refreshUnread);
-    return () => window.removeEventListener(NOTIFICATIONS_CHANGED, refreshUnread);
-  }, [refreshUnread]);
+    if (activePage === "ebookFree" || activePage === "ebookPaid") {
+      setEbookOpen(true);
+    }
+  }, [activePage, refreshUnread]);
 
   useEffect(() => {
-    if (studentChildren.some((item) => item.key === activePage)) setStudentOpen(true);
-    if (ebookChildren.some((item) => item.key === activePage)) setEbookOpen(true);
-  }, [activePage]);
+    const timer = setInterval(refreshUnread, 60000);
 
-  const navigate = (key) => {
-    onNavigate(key);
-    setSidebarOpen(false);
-  };
+    window.addEventListener(NOTIFICATIONS_CHANGED, refreshUnread);
 
-  const renderItem = (item) => {
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener(NOTIFICATIONS_CHANGED, refreshUnread);
+    };
+  }, [refreshUnread]);
+
+  const unreadLabel = unread > 99 ? "99+" : unread;
+
+  function isLocked(key) {
+    return locked && !FREE_PAGES.includes(key);
+  }
+
+  function renderItem(item) {
     const Icon = item.icon;
-    const active = activePage === item.key;
+
     return (
       <button
-        type="button"
         key={item.key}
-        className={`nav-item ${active ? "active" : ""}`}
-        onClick={() => navigate(item.key)}
+        type="button"
+        className={`sidebar-item ${
+          activePage === item.key ? "active" : ""
+        } ${isLocked(item.key) ? "is-locked" : ""}`}
+        onClick={() => onNavigate(item.key)}
       >
         <Icon size={18} />
         <span>{item.label}</span>
-        {item.key === "notifications" && unreadCount > 0 && (
-          <span className="notification-count">{unreadCount}</span>
+
+        {isLocked(item.key) && (
+          <Lock size={14} className="sidebar-lock" />
+        )}
+
+        {item.key === "notifications" && unread > 0 && (
+          <span className="nt-sidebar-badge">{unreadLabel}</span>
         )}
       </button>
     );
-  };
-
-  const renderGroup = (item, open, setOpen) => {
-    const Icon = item.icon;
-    const active = item.children.some((child) => child.key === activePage);
-    return (
-      <div className="nav-group" key={item.key}>
-        <button
-          type="button"
-          className={`nav-item nav-group-toggle ${active ? "active" : ""}`}
-          onClick={() => setOpen((value) => !value)}
-          aria-expanded={open}
-        >
-          <Icon size={18} />
-          <span>{item.label}</span>
-          <ChevronDown size={16} className={open ? "rotated" : ""} />
-        </button>
-        {open && (
-          <div className="nav-children">
-            {item.children.map((child) => {
-              const ChildIcon = child.icon;
-              return (
-                <button
-                  type="button"
-                  key={child.key}
-                  className={`nav-child ${activePage === child.key ? "active" : ""}`}
-                  onClick={() => navigate(child.key)}
-                >
-                  <ChildIcon size={16} />
-                  <span>{child.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        )}
-      </div>
-    );
-  };
+  }
 
   return (
     <div className="app-layout">
-      <header className="mobile-header">
-        <button type="button" onClick={() => setSidebarOpen((v) => !v)} aria-label="Toggle menu">
-          <Menu size={22} />
-        </button>
-        <strong>ExamoApp</strong>
-        <span>{getDisplayName(user)}</span>
-      </header>
+      <aside className="sidebar">
+        <div className="brand">
+          <div className="brand-logo">E</div>
 
-      {sidebarOpen && <button className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} aria-label="Close menu" />}
+          <div>
+            <div className="brand-name">Examo</div>
 
-      <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
-        <div className="sidebar-brand">
-          <div className="brand-mark">E</div>
-          <div><strong>ExamoApp</strong><small>{getRoleLabel(user)}</small></div>
-          <button type="button" className="mobile-close" onClick={() => setSidebarOpen(false)}>×</button>
+            <div className="brand-subtitle">
+              Student Management
+            </div>
+          </div>
         </div>
 
-        <nav className="sidebar-nav">
-          {menuItems.map((item) => {
-            if (item.children) {
-              return item.key === "studentGroup"
-                ? renderGroup(item, studentOpen, setStudentOpen)
-                : renderGroup(item, ebookOpen, setEbookOpen);
-            }
-            return renderItem(item);
-          })}
+        <nav className="sidebar-nav sidebar-scroll">
+          <div className="sidebar-group-title">Overview</div>
+          {overviewItems.map(renderItem)}
+
+          <div className="sidebar-group-title">
+            Opportunities
+          </div>
+          {opportunityItems.map(renderItem)}
+
+          <div className="sidebar-group-title">Academics</div>
+
+          <button
+            type="button"
+            className={`sidebar-item ${
+              studentOpen ? "active" : ""
+            }`}
+            onClick={() => setStudentOpen((open) => !open)}
+            aria-expanded={studentOpen}
+          >
+            <GraduationCap size={18} />
+            <span>Student</span>
+
+            <ChevronDown
+              size={16}
+              className={`sidebar-chevron ${
+                studentOpen ? "open" : ""
+              }`}
+            />
+          </button>
+
+          <div
+            className={`sidebar-submenu ${
+              studentOpen ? "open" : ""
+            }`}
+          >
+            <div className="sidebar-submenu-inner">
+              {studentChildren.map((item) => {
+                const Icon = item.icon;
+
+                return (
+                  <button
+                    key={item.key}
+                    type="button"
+                    className={`sidebar-subitem ${
+                      activePage === item.key ? "active" : ""
+                    } ${isLocked(item.key) ? "is-locked" : ""}`}
+                    onClick={() => onNavigate(item.key)}
+                  >
+                    <Icon size={17} />
+                    <span>{item.label}</span>
+
+                    {isLocked(item.key) && (
+                      <Lock size={13} className="sidebar-lock" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <button
+            type="button"
+            className={`sidebar-item ${
+              ebookOpen || activePage === "ebookFree" || activePage === "ebookPaid"
+                ? "active"
+                : ""
+            }`}
+            onClick={() => setEbookOpen((open) => !open)}
+            aria-expanded={ebookOpen}
+          >
+            <Library size={18} />
+            <span>Ebooks</span>
+            <ChevronDown
+              size={16}
+              className={`sidebar-chevron ${ebookOpen ? "open" : ""}`}
+            />
+          </button>
+
+          <div className={`sidebar-submenu ${ebookOpen ? "open" : ""}`}>
+            <div className="sidebar-submenu-inner">
+              {[
+                { key: "ebookFree", label: "Free Ebooks", icon: BookOpen },
+                { key: "ebookPaid", label: "Paid Ebooks", icon: Lock },
+              ].map((item) => {
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.key}
+                    type="button"
+                    className={`sidebar-subitem ${
+                      activePage === item.key ? "active" : ""
+                    } ${isLocked(item.key) ? "is-locked" : ""}`}
+                    onClick={() => onNavigate(item.key)}
+                  >
+                    <Icon size={17} />
+                    <span>{item.label}</span>
+                    {isLocked(item.key) && (
+                      <Lock size={13} className="sidebar-lock" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="sidebar-group-title">General</div>
+          {generalItems.map(renderItem)}
         </nav>
 
-        <div className="sidebar-footer">
-          <div className="sidebar-user">
-            <span className="user-avatar">{(getDisplayName(user) || "U").charAt(0).toUpperCase()}</span>
-            <div><strong>{getDisplayName(user)}</strong><small>{getRoleLabel(user)}</small></div>
+        <div className="sidebar-bottom">
+          <div className="profile-mini">
+            <div className="avatar">{initial}</div>
+
+            <div>
+              <strong>{displayName}</strong>
+              <span>{roleLabel}</span>
+            </div>
           </div>
-          <button type="button" className="logout-button" onClick={onLogout}>
-            <LogOut size={17} /> Logout
+
+          <button
+            type="button"
+            className="logout-btn"
+            onClick={onLogout}
+          >
+            <LogOut size={16} />
+
+            <span>Logout</span>
           </button>
         </div>
       </aside>
 
       <main className="main-content">
-        {children}
+        <header className="topbar">
+          <div className="mobile-menu">
+            <Menu size={22} />
+          </div>
+
+          <div className="breadcrumb">
+            Examo /{" "}
+            <strong>{pageNames[activePage] || "Dashboard"}</strong>
+          </div>
+
+          <div className="topbar-actions">
+            <button
+              type="button"
+              className="nt-bell"
+              onClick={() => onNavigate("notifications")}
+              aria-label="Notifications"
+              title="Notifications"
+            >
+              <Bell size={19} />
+
+              {unread > 0 && (
+                <span className="nt-bell-badge">{unreadLabel}</span>
+              )}
+            </button>
+
+            <div className="topbar-profile">
+              <div className="avatar">{initial}</div>
+
+              <div>
+                <strong>{displayName}</strong>
+                <span>{roleLabel}</span>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <div className="content-area">{children}</div>
       </main>
     </div>
   );
