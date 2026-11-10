@@ -238,8 +238,9 @@ function AdminEbooks() {
       {notice && <div className="success-box">{notice}</div>}
       {error && <div className="error-box">{error}</div>}
 
+      <div className="data-card">
       {loading ? <div className="loading-state">Loading ebooks...</div> : filteredItems.length === 0 ? (
-        <div className="empty-state"><BookOpen size={28} /><h3>No ebooks found</h3><p>Upload a PDF to get started.</p></div>
+        <div className="empty-state"><div className="empty-icon"><BookOpen size={24} /></div><h3>No ebooks found</h3><p>Upload a PDF to get started.</p></div>
       ) : (
         <div className="table-container">
           <table className="data-table">
@@ -266,6 +267,7 @@ function AdminEbooks() {
           </table>
         </div>
       )}
+      </div>
 
       {showModal && (
         <Modal title={editingId ? "Edit Ebook" : "Add Ebook"} onClose={closeModal}>
