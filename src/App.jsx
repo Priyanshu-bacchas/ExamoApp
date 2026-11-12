@@ -13,7 +13,6 @@ import Results from "./pages/Results";
 import Subjects from "./pages/Subjects";
 import Schedules from "./pages/Schedules";
 import Documents from "./pages/Documents";
-import Ebooks from "./pages/Ebooks";
 import Help from "./pages/Help";
 import Subscription from "./pages/Subscription";
 import Notifications from "./pages/Notifications";
@@ -219,12 +218,6 @@ function App() {
 
       case "documents":
         return <Documents />;
-
-      case "ebookFree":
-        return <Ebooks access="Free" onNavigate={setActivePage} />;
-
-      case "ebookPaid":
-        return <Ebooks access="Paid" onNavigate={setActivePage} />;
 
       case "jobs":
         return <Jobs onNavigate={setActivePage} />;

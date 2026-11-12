@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 
 import CrudPage from "../components/CrudPage";
-import AdminEbooks from "./AdminEbooks";
 import ContentSummary, {
   CONTENT_CHANGED_EVENT,
 } from "../components/ContentSummary";
@@ -21,7 +20,6 @@ const TABS = [
   { key: "Exam", label: "Exam" },
   { key: "Result", label: "Results" },
   { key: "AdmitCard", label: "Admit Cards" },
-  { key: "Ebook", label: "Ebook" },
 ];
 
 const STATUS_OPTIONS = ["Out", "Upcoming"];
@@ -118,23 +116,6 @@ function AdminJobs() {
     </div>
   );
 
-  if (activeTab === "Ebook") {
-    return (
-      <div className="page">
-        <div className="page-header">
-          <div>
-            <h1>Content Manager</h1>
-            <p>Manage jobs, exams, results, admit cards and ebooks.</p>
-          </div>
-        </div>
-        <ContentSummary />
-
-        {tabs}
-        <AdminEbooks key={refreshKey} />
-      </div>
-    );
-  }
-
   const fields = [
     {
       name: "examName",
@@ -227,7 +208,7 @@ function AdminJobs() {
       <div className="page-header">
         <div>
           <h1>Content Manager</h1>
-          <p>Manage jobs, exams, results, admit cards and ebooks.</p>
+          <p>Manage jobs, exams, results and admit cards.</p>
         </div>
         </div>
         <ContentSummary />

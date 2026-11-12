@@ -15,7 +15,6 @@ import {
   Menu,
   LogOut,
   Lock,
-  Book,
 } from "lucide-react";
 
 import {
@@ -88,8 +87,6 @@ const pageNames = {
   subjects: "Subjects",
   schedules: "Schedule",
   documents: "Documents",
-  ebookFree: "Free Ebooks",
-  ebookPaid: "Paid Ebooks",
   jobs: "Jobs",
   notifications: "Notifications",
   help: "Help",
@@ -112,9 +109,6 @@ function Layout({
     : "S";
 
   const [studentOpen, setStudentOpen] = useState(true);
-  const [ebookOpen, setEbookOpen] = useState(
-    activePage === "ebookFree" || activePage === "ebookPaid"
-  );
 
   // Unread notifications (topbar bell + sidebar badge)
   const [unread, setUnread] = useState(0);
@@ -134,9 +128,6 @@ function Layout({
   // Page badalne par + har 1 minute me + notifications badalne par refresh
   useEffect(() => {
     refreshUnread();
-    if (activePage === "ebookFree" || activePage === "ebookPaid") {
-      setEbookOpen(true);
-    }
   }, [activePage, refreshUnread]);
 
   useEffect(() => {
@@ -248,51 +239,6 @@ function Layout({
                     <Icon size={17} />
                     <span>{item.label}</span>
 
-                    {isLocked(item.key) && (
-                      <Lock size={13} className="sidebar-lock" />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <button
-            type="button"
-            className={`sidebar-item ${
-              ebookOpen || activePage === "ebookFree" || activePage === "ebookPaid"
-                ? "active"
-                : ""
-            }`}
-            onClick={() => setEbookOpen((open) => !open)}
-            aria-expanded={ebookOpen}
-          >
-            <Book size={18} />
-            <span>Ebooks</span>
-            <ChevronDown
-              size={16}
-              className={`sidebar-chevron ${ebookOpen ? "open" : ""}`}
-            />
-          </button>
-
-          <div className={`sidebar-submenu ${ebookOpen ? "open" : ""}`}>
-            <div className="sidebar-submenu-inner">
-              {[
-                { key: "ebookFree", label: "Free Ebooks", icon: BookOpen },
-                { key: "ebookPaid", label: "Paid Ebooks", icon: Lock },
-              ].map((item) => {
-                const Icon = item.icon;
-                return (
-                  <button
-                    key={item.key}
-                    type="button"
-                    className={`sidebar-subitem ${
-                      activePage === item.key ? "active" : ""
-                    } ${isLocked(item.key) ? "is-locked" : ""}`}
-                    onClick={() => onNavigate(item.key)}
-                  >
-                    <Icon size={17} />
-                    <span>{item.label}</span>
                     {isLocked(item.key) && (
                       <Lock size={13} className="sidebar-lock" />
                     )}
