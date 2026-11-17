@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Eye, EyeOff, KeyRound } from "lucide-react";
+import { KeyRound } from "lucide-react";
 
 import CrudPage from "../components/CrudPage";
 import Modal from "../components/Modal";
@@ -12,49 +12,6 @@ import {
   resetStudentPassword,
   setStudentBlocked,
 } from "../services/studentService";
-
-// Password cell: default hidden, visible via eye icon
-function PasswordCell({ value }) {
-  const [show, setShow] = useState(false);
-
-  if (!value) {
-    return <span style={{ color: "#94a3b8" }}>Not set</span>;
-  }
-
-  return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "8px",
-      }}
-    >
-      <span
-        style={{
-          fontFamily: "monospace",
-          letterSpacing: show ? "0" : "2px",
-        }}
-      >
-        {show ? value : "••••••••"}
-      </span>
-
-      <button
-        type="button"
-        onClick={() => setShow(!show)}
-        title={show ? "Hide password" : "Show password"}
-        style={{
-          display: "flex",
-          padding: 2,
-          border: "none",
-          background: "none",
-          color: "#64748b",
-        }}
-      >
-        {show ? <EyeOff size={15} /> : <Eye size={15} />}
-      </button>
-    </span>
-  );
-}
 
 // Credentials Reset: sets a new password for the user
 function ResetPasswordAction({ item, onDone }) {
@@ -247,11 +204,6 @@ function Students() {
           label: "Mobile",
         },
         {
-          key: "password",
-          label: "Password",
-          render: (item) => <PasswordCell value={item.password} />,
-        },
-        {
           key: "role",
           label: "Role",
           render: (item) => (
@@ -316,7 +268,7 @@ function Students() {
           name: "password",
           label: "Password",
           type: "password",
-          placeholder: "Min 6 characters",
+          placeholder: "Min 6 characters (blank = keep current)",
           autoComplete: "new-password",
         },
       ]}
