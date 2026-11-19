@@ -248,7 +248,52 @@ function Jobs({ onNavigate }) {
 
   function renderJobsTable() {
     return (
-      <table className="data-table">
+      <>
+        <div className="mobile-record-list">
+          {items.map((item) => {
+            const left = daysLeft(item.lastDate);
+            return (
+              <article className="mobile-record-card" key={item.id}>
+                <div className="mobile-record-heading">
+                  <h3>{item.examName}</h3>
+                </div>
+                <div className="mobile-record-fields">
+                  <div className="mobile-record-field">
+                    <span>Start date</span>
+                    <div>{formatDay(item.startDate)}</div>
+                  </div>
+                  <div className="mobile-record-field">
+                    <span>Last date</span>
+                    <div>
+                      {formatDay(item.lastDate)}
+                      {left !== null && left >= 0 && left <= 3 && (
+                        <span className={`jobs-chip ${left === 0 ? "urgent" : ""}`}>
+                          {left === 0 ? "Last date today" : left === 1 ? "1 day left" : `${left} days left`}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="mobile-record-field">
+                    <span>Details</span>
+                    <div>{renderDetails(item)}</div>
+                  </div>
+                </div>
+                <div className="mobile-record-actions">
+                  {item.isAdded ? (
+                    <button type="button" className="jobs-add-btn added" disabled>
+                      <Check size={14} /> Added
+                    </button>
+                  ) : (
+                    <button type="button" className="jobs-add-btn" onClick={() => handleAdd(item)} disabled={addingId === item.id}>
+                      <Plus size={14} /> {addingId === item.id ? "Adding..." : "Add to ExamForm"}
+                    </button>
+                  )}
+                </div>
+              </article>
+            );
+          })}
+        </div>
+        <table className="data-table">
         <thead>
           <tr>
             <th>Exam Name</th>
@@ -321,7 +366,43 @@ function Jobs({ onNavigate }) {
 
   function renderPostsTable() {
     return (
-      <table className="data-table">
+      <>
+        <div className="mobile-record-list">
+          {items.map((item) => {
+            const url = safeUrl(item.link);
+            return (
+              <article className="mobile-record-card" key={item.id}>
+                <div className="mobile-record-heading">
+                  <h3>{item.examName}</h3>
+                </div>
+                <div className="mobile-record-fields">
+                  <div className="mobile-record-field">
+                    <span>Date</span>
+                    <div>{formatDay(item.postDate)}</div>
+                  </div>
+                  <div className="mobile-record-field">
+                    <span>Status</span>
+                    <div>
+                      <span className={`status-badge ${item.status === "Out" ? "status-filled" : "status-pending"}`}>
+                        {item.status || "-"}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="mobile-record-field">
+                    <span>Details</span>
+                    <div>{renderDetails(item)}</div>
+                  </div>
+                </div>
+                <div className="mobile-record-actions">
+                  {url ? (
+                    <a className="jobs-open-btn" href={url} target="_blank" rel="noopener noreferrer">Open</a>
+                  ) : <span className="mobile-muted">No link available</span>}
+                </div>
+              </article>
+            );
+          })}
+        </div>
+        <table className="data-table">
         <thead>
           <tr>
             <th>Exam Name</th>
