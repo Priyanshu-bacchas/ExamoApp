@@ -451,7 +451,7 @@ function CrudPage({
         </div>
       )}
 
-      <div className="data-card">
+      <div className="data-card responsive-record-data">
         {!loading && visibleItems.length > 0 && (
           <div className="mobile-record-list">
             {visibleItems.map((item) => (
