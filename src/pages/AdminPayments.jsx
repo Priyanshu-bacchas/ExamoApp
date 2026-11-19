@@ -546,7 +546,7 @@ function AdminPayments() {
             </span>
           </form>
 
-          <div className="data-card responsive-record-data">
+          <div className="data-card">
             {loading ? (
               <div className="loading-state">Loading...</div>
             ) : items.length === 0 ? (
@@ -557,31 +557,6 @@ function AdminPayments() {
               </div>
             ) : (
               <>
-                <div className="mobile-record-list">
-                  {pageItems.map((item) => (
-                    <article className="mobile-record-card" key={item.userId}>
-                      <div className="mobile-record-heading">
-                        <h3>{item.name || "User"}</h3>
-                      </div>
-                      <p className="mobile-record-subtitle">{item.email || "-"}</p>
-                      <div className="mobile-record-fields">
-                        <div className="mobile-record-field"><span>Plan</span><div>{item.planName || "-"}</div></div>
-                        <div className="mobile-record-field">
-                          <span>Status</span>
-                          <div><span className={`adm-pill ${STATUS_PILL[item.status] || "adm-pill-slate"}`}>{item.status === "Trial" ? "Free Trial" : item.status}</span></div>
-                        </div>
-                        <div className="mobile-record-field"><span>Started</span><div>{formatDate(item.startsAt)}</div></div>
-                        <div className="mobile-record-field"><span>Ends</span><div>{formatDate(item.endsAt)}</div></div>
-                        <div className="mobile-record-field"><span>Time left</span><div>{renderTimeLeft(item)}</div></div>
-                        <div className="mobile-record-field"><span>Paid</span><div>{item.totalPaid ? `₹${formatAmount(item.totalPaid)}` : "-"}</div></div>
-                      </div>
-                      <div className="mobile-record-actions">
-                        <button type="button" className="apay-btn apay-btn-edit" onClick={() => openEdit(item)}><Pencil size={14} /> Edit</button>
-                        <button type="button" className="apay-btn apay-btn-renew" onClick={() => openRenew(item)}><RefreshCw size={14} /> Renew</button>
-                      </div>
-                    </article>
-                  ))}
-                </div>
                 <div className="table-container">
                   <table className="data-table">
                     <thead>
