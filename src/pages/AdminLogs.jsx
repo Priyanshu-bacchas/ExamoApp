@@ -111,7 +111,7 @@ function AdminLogs() {
         </span>
       </form>
 
-      <div className="data-card responsive-record-data">
+      <div className="data-card">
         {loading ? (
           <div className="loading-state">Loading...</div>
         ) : logs.length === 0 ? (
@@ -121,36 +121,6 @@ function AdminLogs() {
             <p>Activity yahan dikhegi.</p>
           </div>
         ) : (
-          <>
-          <div className="mobile-record-list">
-            {logs.map((log) => (
-              <article className="mobile-record-card" key={log.id}>
-                <div className="mobile-record-heading">
-                  <h3>{log.action || "Activity"}</h3>
-                </div>
-                <p className="mobile-record-subtitle">
-                  {log.userName || "-"}{log.userEmail ? ` · ${log.userEmail}` : ""}
-                </p>
-                <div className="mobile-record-fields">
-                  <div className="mobile-record-field"><span>Time</span><div>{formatDateTime(log.createdAt)}</div></div>
-                  <div className="mobile-record-field">
-                    <span>Role</span>
-                    <div>{log.role ? <span className={`adm-pill ${log.role === "Admin" ? "adm-pill-violet" : "adm-pill-blue"}`}>{log.role}</span> : "-"}</div>
-                  </div>
-                  <div className="mobile-record-field">
-                    <span>Action</span>
-                    <div><span className={`adm-pill ${getActionPill(log)}`}>{log.action}</span></div>
-                  </div>
-                  <div className="mobile-record-field"><span>Details</span><div>{log.details || "-"}</div></div>
-                  <div className="mobile-record-field"><span>IP address</span><div>{log.ipAddress || "-"}</div></div>
-                  <div className="mobile-record-field">
-                    <span>Result</span>
-                    <div><span className={`adm-pill ${log.success ? "adm-pill-green" : "adm-pill-red"}`}>{log.success ? "Success" : "Failed"}</span></div>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
           <div className="table-container">
             <table className="data-table">
               <thead>
@@ -224,7 +194,6 @@ function AdminLogs() {
               </tbody>
             </table>
           </div>
-          </>
         )}
       </div>
     </div>
