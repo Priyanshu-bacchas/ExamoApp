@@ -920,3 +920,146 @@
     grid-column: auto;
   }
 }
+
+/* ===== Responsive record cards (mobile) ===== */
+.mobile-record-list {
+  display: none;
+}
+
+.mobile-record-card {
+  min-width: 0;
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid #e1e7f0;
+  border-radius: 14px;
+  box-shadow: 0 5px 16px rgba(20, 38, 70, 0.06);
+}
+
+.mobile-record-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.mobile-record-heading h3 {
+  min-width: 0;
+  margin: 0;
+  color: #172033;
+  font-size: 16px;
+  line-height: 1.35;
+  font-weight: 750;
+  overflow-wrap: anywhere;
+}
+
+.mobile-record-subtitle {
+  margin: 5px 0 0;
+  color: #718096;
+  font-size: 11px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.mobile-record-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 13px 14px;
+  margin-top: 15px;
+}
+
+.mobile-record-field {
+  min-width: 0;
+}
+
+.mobile-record-field > span {
+  display: block;
+  margin-bottom: 5px;
+  color: #8290a5;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
+.mobile-record-field > div {
+  min-width: 0;
+  color: #344054;
+  font-size: 13px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.mobile-record-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 15px;
+  padding-top: 13px;
+  border-top: 1px solid #edf0f5;
+}
+
+.mobile-muted {
+  color: #8792a5;
+  font-size: 12px;
+}
+
+@media (max-width: 600px) {
+  .responsive-record-data {
+    overflow: visible !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .responsive-record-data > .table-container {
+    display: none !important;
+  }
+
+  .responsive-record-data > .mobile-record-list {
+    display: flex !important;
+    flex-direction: column;
+    gap: 13px;
+    width: 100%;
+  }
+
+  .mobile-record-card {
+    width: 100%;
+    padding: 15px;
+    border-radius: 14px;
+  }
+
+  .mobile-record-fields {
+    gap: 12px 10px;
+  }
+
+  .mobile-record-actions {
+    justify-content: flex-start;
+  }
+
+  .mobile-record-actions .jobs-add-btn,
+  .mobile-record-actions .jobs-open-btn {
+    max-width: 100%;
+  }
+
+  .page-header h1 {
+    font-size: 25px;
+    line-height: 1.2;
+  }
+
+  .page-header p {
+    line-height: 1.45;
+  }
+}
+
+@media (max-width: 360px) {
+  .mobile-record-card {
+    padding: 13px;
+  }
+
+  .mobile-record-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
