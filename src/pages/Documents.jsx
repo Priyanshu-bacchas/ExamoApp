@@ -313,6 +313,54 @@ function Documents() {
             <p>Upload a photo or PDF to see it here.</p>
           </div>
         ) : (
+          <>
+          <div className="mobile-record-list">
+            {items.map((item) => (
+              <article className="mobile-record-card" key={item.id}>
+                <div className="mobile-record-heading">
+                  {item.kind === "Photo" ? (
+                    <ImageIcon size={20} color="#2563eb" />
+                  ) : (
+                    <FileText size={20} color="#dc2626" />
+                  )}
+                  <h3>{item.name}</h3>
+                </div>
+                <p className="mobile-record-subtitle">{item.fileName}</p>
+                <div className="mobile-record-fields">
+                  <div className="mobile-record-field">
+                    <span>Type</span>
+                    <div>
+                      <span className={`status-badge ${item.kind === "Photo" ? "status-progress" : "status-pending"}`}>
+                        {item.kind}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="mobile-record-field">
+                    <span>Size</span>
+                    <div>{formatSize(item.sizeBytes)}</div>
+                  </div>
+                  <div className="mobile-record-field">
+                    <span>Uploaded</span>
+                    <div>{formatDate(item.createdAt)}</div>
+                  </div>
+                </div>
+                <div className="mobile-record-actions">
+                  <button className="edit-button" title="View" onClick={() => handleView(item)} disabled={busyId === item.id}>
+                    <Eye size={17} />
+                  </button>
+                  <button className="edit-button" title="Download" onClick={() => handleDownload(item)} disabled={busyId === item.id}>
+                    <Download size={17} />
+                  </button>
+                  <button className="edit-button" title="Edit name" onClick={() => openEdit(item)} disabled={busyId === item.id}>
+                    <Pencil size={17} />
+                  </button>
+                  <button className="delete-button" title="Delete" onClick={() => handleDelete(item)} disabled={busyId === item.id}>
+                    <Trash2 size={17} />
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
           <div className="table-container">
             <table className="data-table">
               <thead>
@@ -417,6 +465,7 @@ function Documents() {
               </tbody>
             </table>
           </div>
+          </>
         )}
       </div>
 
