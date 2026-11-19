@@ -303,7 +303,7 @@ function Documents() {
 
       {error && <div className="error-box">{error}</div>}
 
-      <div className="data-card">
+      <div className="data-card responsive-record-data">
         {loading ? (
           <div className="loading-state">Loading...</div>
         ) : items.length === 0 ? (
