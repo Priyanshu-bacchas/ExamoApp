@@ -506,7 +506,7 @@ function Jobs({ onNavigate }) {
 
       {notice && <div className="jobs-notice">{notice}</div>}
 
-      <div className="data-card">
+      <div className="data-card responsive-record-data">
         {loading ? (
           <div className="loading-state">Loading...</div>
         ) : items.length === 0 ? (
