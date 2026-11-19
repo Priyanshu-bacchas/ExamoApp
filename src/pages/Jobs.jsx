@@ -361,6 +361,7 @@ function Jobs({ onNavigate }) {
           })}
         </tbody>
       </table>
+      </>
     );
   }
 
@@ -458,6 +459,7 @@ function Jobs({ onNavigate }) {
           })}
         </tbody>
       </table>
+      </>
     );
   }
 
