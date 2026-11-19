@@ -102,14 +102,6 @@ function CrudPage({
 
   const showToolbar = Boolean(searchKeys?.length || filter);
 
-  // Mobile cards use a meaningful record title while keeping every column visible.
-  const mobileTitleColumn =
-    columns.find((column) => column.mobileTitle) ||
-    columns.find((column) =>
-      ["examName", "subject", "name", "title", "fullName", "studentName"].includes(column.key)
-    ) ||
-    columns[0];
-
   // ---- Bulk select ----
   const allVisibleSelected =
     visibleItems.length > 0 &&
@@ -451,65 +443,7 @@ function CrudPage({
         </div>
       )}
 
-      <div className="data-card responsive-record-data">
-        {!loading && visibleItems.length > 0 && (
-          <div className="mobile-record-list">
-            {visibleItems.map((item) => (
-              <article className="mobile-record-card" key={item.id}>
-                <div className="mobile-record-heading">
-                  {bulkActions && (
-                    <input
-                      type="checkbox"
-                      checked={selected.includes(item.id)}
-                      onChange={() => toggleOne(item.id)}
-                      aria-label="Select record"
-                    />
-                  )}
-                  <h3>
-                    {mobileTitleColumn
-                      ? formatValue(item[mobileTitleColumn.key], mobileTitleColumn.type)
-                      : "Record"}
-                  </h3>
-                </div>
-
-                <div className="mobile-record-fields">
-                  {columns
-                    .filter((column) => column.key !== mobileTitleColumn?.key)
-                    .map((column) => (
-                      <div className="mobile-record-field" key={column.key}>
-                        <span>{column.label}</span>
-                        <div>
-                          {column.render
-                            ? column.render(item)
-                            : formatValue(item[column.key], column.type)}
-                        </div>
-                      </div>
-                    ))}
-                </div>
-
-                <div className="mobile-record-actions">
-                  {extraActions && extraActions(item, loadData)}
-                  <button
-                    className="edit-button"
-                    onClick={() => openEdit(item)}
-                    title="Edit"
-                    aria-label="Edit record"
-                  >
-                    <Pencil size={17} />
-                  </button>
-                  <button
-                    className="delete-button"
-                    onClick={() => handleDelete(item.id)}
-                    title="Delete"
-                    aria-label="Delete record"
-                  >
-                    <Trash2 size={17} />
-                  </button>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
+      <div className="data-card">
         {loading ? (
           <div className="loading-state">
             Loading...
