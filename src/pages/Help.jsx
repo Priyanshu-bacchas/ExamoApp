@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
+
 import {
   Search,
   ChevronDown,
-  ChevronRight,
   Mail,
   MessageCircle,
-  Headphones,
-  X,
+  GraduationCap,
+  CalendarDays,
+  Laptop,
 } from "lucide-react";
 
 import { getHelpContent, searchHelp } from "../services/helpService";
@@ -14,6 +15,44 @@ import ContactForm from "../components/ContactForm";
 import HelpChatbot from "../components/HelpChatbot";
 
 import "./HelpSubscription.css";
+
+// Card ke icons (title se match hote hain)
+const cardIcons = {
+  "Student Basics": GraduationCap,
+  "Exam Enrollment": CalendarDays,
+  "Technical Issues": Laptop,
+};
+
+// Backend na mile to ye dikhega
+const fallbackFeatured = [
+  {
+    title: "Student Basics",
+    tone: "mint",
+    links: [
+      "How to use this website?",
+      "What does the Dashboard show?",
+      "How to upload my documents?",
+    ],
+  },
+  {
+    title: "Exam Enrollment",
+    tone: "lavender",
+    links: [
+      "How do I add an exam form?",
+      "How do I change my exam form status?",
+      "How to check my results?",
+    ],
+  },
+  {
+    title: "Technical Issues",
+    tone: "sky",
+    links: [
+      "I can't log in to my account",
+      "My document upload is failing",
+      "The page is not loading properly",
+    ],
+  },
+];
 
 const fallbackFaqs = [
   {
@@ -48,26 +87,36 @@ const fallbackFaqs = [
   },
 ];
 
-function Help() {
+function Help({ onNavigate }) {
+  const [featured, setFeatured] = useState(fallbackFeatured);
   const [faqs, setFaqs] = useState(fallbackFaqs);
+
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState(null);
+  const [results, setResults] = useState(null); // null = search nahi ho raha
   const [searchMessage, setSearchMessage] = useState("");
   const [searching, setSearching] = useState(false);
+  const [openIndex, setOpenIndex] = useState(0);
   const [chatOpen, setChatOpen] = useState(false);
 
-  // Keep the help articles available to the search fallback and Examo chatbot.
+
+  // Featured cards + FAQ backend se
   useEffect(() => {
     let cancelled = false;
 
     getHelpContent()
       .then((data) => {
-        if (!cancelled && Array.isArray(data?.faqs) && data.faqs.length) {
+        if (cancelled || !data) return;
+
+        if (Array.isArray(data.featured) && data.featured.length) {
+          setFeatured(data.featured);
+        }
+
+        if (Array.isArray(data.faqs) && data.faqs.length) {
           setFaqs(data.faqs);
         }
       })
       .catch(() => {
-        // Local help content remains available when the API is unreachable.
+        // Backend nahi mila: fallback content dikhega
       });
 
     return () => {
@@ -75,9 +124,11 @@ function Help() {
     };
   }, []);
 
-  // Search remains live as the user types; results appear only when a query exists.
+  // Search: type karne ke 0.35 sec baad backend se jawab
   useEffect(() => {
     const text = query.trim();
+
+    setOpenIndex(0);
 
     if (!text) {
       setResults(null);
@@ -92,6 +143,7 @@ function Help() {
     const timer = setTimeout(async () => {
       try {
         const data = await searchHelp(text);
+
         if (cancelled) return;
 
         setResults(Array.isArray(data?.results) ? data.results : []);
@@ -99,12 +151,14 @@ function Help() {
       } catch {
         if (cancelled) return;
 
+        // Backend na chale to local FAQ me dhoondho
         const lower = text.toLowerCase();
+
         setResults(
           faqs.filter(
             (item) =>
-              String(item.question || "").toLowerCase().includes(lower) ||
-              String(item.answer || "").toLowerCase().includes(lower)
+              item.question.toLowerCase().includes(lower) ||
+              item.answer.toLowerCase().includes(lower)
           )
         );
         setSearchMessage("");
@@ -117,118 +171,149 @@ function Help() {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [query, faqs]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query]);
 
-  function handleSearchSubmit(event) {
-    event.preventDefault();
-  }
+  const visibleFaqs = results ?? faqs;
 
   return (
     <div className="hs-page">
-      <section className="hs-hero">
-        <div className="hs-hero-title">
-          <span className="hs-hero-icon">
-            <Headphones size={25} strokeWidth={2} />
-          </span>
-          <h1>How can we help you today?</h1>
-        </div>
+      <div className="hs-main">
+        <section className="hs-hero">
+          <div className="hs-hero-title">
+            <span className="hs-hero-icon">
+              <MessageCircle size={26} />
+            </span>
 
-        <p className="hs-hero-description">
-          Search for help, guides or common issues and get quick support.
-        </p>
-
-        <form className="hs-search" onSubmit={handleSearchSubmit} role="search">
-          <Search className="hs-search-leading" size={21} />
-          <input
-            type="search"
-            placeholder="Search for help..."
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            aria-label="Search help articles"
-          />
-          {query && (
-            <button
-              type="button"
-              className="hs-search-clear"
-              aria-label="Clear search"
-              onClick={() => setQuery("")}
-            >
-              <X size={17} />
-            </button>
-          )}
-          <button type="submit" className="hs-search-submit" aria-label="Search">
-            <Search size={19} />
-          </button>
-        </form>
-      </section>
-
-      {query.trim() && (
-        <section className="hs-search-results" aria-live="polite">
-          <div className="hs-search-results-heading">
-            <h2>{searching ? "Searching for answers..." : "Search results"}</h2>
-            <button type="button" onClick={() => setQuery("")}>
-              Clear
-            </button>
+            <h1>How can we help you today?</h1>
           </div>
 
-          {!searching && results?.length === 0 && (
-            <p className="hs-search-empty">
-              {searchMessage || "No matching help articles found. Try another keyword."}
-            </p>
+          <div className="hs-search">
+            <input
+              type="text"
+              placeholder="Search for help..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+
+            <button type="button" aria-label="Search">
+              <Search size={18} />
+            </button>
+          </div>
+        </section>
+
+        <h2 className="hs-heading">Featured FAQ</h2>
+
+        <div className="hs-card-grid">
+          {featured.map((card) => {
+            const Icon = cardIcons[card.title] || GraduationCap;
+
+            return (
+              <div className="hs-faq-card" key={card.title}>
+                <div className={`hs-faq-card-head ${card.tone}`}>
+                  <h3>{card.title}</h3>
+                  <Icon size={34} strokeWidth={1.6} />
+                </div>
+
+                <ul>
+                  {card.links.map((link) => (
+                    <li key={link}>
+                      <button
+                        type="button"
+                        onClick={() => setQuery(link)}
+                      >
+                        {link}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
+        </div>
+
+        <h2 className="hs-heading">
+          {results !== null
+            ? "Answers for your search"
+            : "Frequently Asked Questions"}
+        </h2>
+
+        <div className="hs-accordion">
+          {searching && results === null && (
+            <div className="hs-empty">Searching...</div>
           )}
 
-          {!searching &&
-            results?.map((item, index) => (
-              <article className="hs-search-result" key={item.id ?? item.question ?? index}>
-                <h3>{item.question || "Help article"}</h3>
-                <p>{item.answer || item.content || ""}</p>
-              </article>
-            ))}
-        </section>
-      )}
+          {!searching && visibleFaqs.length === 0 && (
+            <div className="hs-empty">
+              {searchMessage ||
+                "No results found. Try a different keyword."}
+            </div>
+          )}
 
-      <section className="hs-support-intro">
-        <span className="hs-support-intro-icon">
-          <MessageCircle size={22} />
-        </span>
-        <div>
-          <h2>Still need help?</h2>
-          <p>Send us your question and our support team will get back to you.</p>
+          {visibleFaqs.map((item, index) => {
+            const open = openIndex === index;
+
+            return (
+              <div
+                className={`hs-acc-item ${open ? "open" : ""}`}
+                key={item.id ?? item.question}
+              >
+                <button
+                  type="button"
+                  className="hs-acc-head"
+                  onClick={() => setOpenIndex(open ? -1 : index)}
+                >
+                  <span>{item.question}</span>
+                  <ChevronDown size={18} />
+                </button>
+
+                {open && (
+                  <div className="hs-acc-body">{item.answer}</div>
+                )}
+              </div>
+            );
+          })}
         </div>
-      </section>
+      </div>
 
-      <ContactForm />
+      <aside className="hs-side">
+        <h2>Still need help?</h2>
 
-      <div className="hs-contact-links">
-        <button
-          type="button"
-          className="hs-contact-action hs-chat-open"
-          onClick={() => setChatOpen(true)}
-        >
-          <span className="hs-action-icon">
-            <MessageCircle size={27} />
-          </span>
-          <span className="hs-action-copy">
-            <strong>Chat with Examo Assistant</strong>
-            <span>Instant answers, available 24/7</span>
-          </span>
-          <ChevronRight className="hs-action-arrow" size={23} />
-        </button>
+        <p className="hs-side-text">
+          Send us your question and our support team will get back
+          to you.
+        </p>
 
-        <a
-          className="hs-contact-action hs-email-open"
-          href="mailto:examoaspirant@gmail.com"
-        >
-          <span className="hs-action-icon">
-            <Mail size={27} />
-          </span>
-          <span className="hs-action-copy">
+        <ContactForm />
+
+        <div className="hs-contact-links">
+          <div>
+            <Mail size={16} />
             <strong>Email Support</strong>
             <span>examoaspirant@gmail.com</span>
-          </span>
-          <ChevronRight className="hs-action-arrow" size={23} />
-        </a>
-      </div>
+          </div>
+
+          <button
+            type="button"
+            className="hs-chat-open"
+            onClick={() => setChatOpen(true)}
+          >
+            <MessageCircle size={16} />
+            <strong>Chat with Examo Assistant</strong>
+            <span>Instant answers, available 24/7</span>
+          </button>
+        </div>
+
+        {onNavigate && (
+          <button
+            type="button"
+            className="hs-link-btn"
+            onClick={() => onNavigate("subscription")}
+          >
+            View subscription details
+          </button>
+        )}
+      </aside>
 
       <HelpChatbot
         open={chatOpen}
@@ -236,7 +321,7 @@ function Help() {
         faqs={faqs}
         onContact={() =>
           document
-            .querySelector(".hs-contact")
+            .querySelector(".hs-side")
             ?.scrollIntoView({ behavior: "smooth", block: "start" })
         }
       />
